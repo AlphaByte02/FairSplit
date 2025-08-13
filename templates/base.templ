@@ -1,0 +1,78 @@
+package views
+
+import "time"
+import "strings"
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html class="dark">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width,initial-scale=1"/>
+			<title>SplitFlow - { title }</title>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
+			<script>
+				window.__unocss = {
+					preflight: true
+				}
+			</script>
+			<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+			<style>
+				[un-cloak] {
+					display: none;
+				}
+			</style>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<style>
+				.fade-in {
+					animation: fadeIn .24s ease;
+				}
+
+				@keyframes fadeIn {
+					from {
+						opacity: 0;
+						transform: translateY(6px);
+					}
+
+					to {
+						opacity: 1;
+						transform: translateY(0);
+					}
+				}
+			</style>
+		</head>
+		<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased" un-cloak>
+			<div class="min-h-screen flex flex-col">
+				<header class="bg-transparent backdrop-blur-sm border-b border-white/6">
+					<div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+						<a href="/" class="flex items-center gap-3">
+							<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 grid place-items-center shadow-lg">
+								<span class="font-bold">S</span>
+							</div>
+							<div>
+								<div class="text-lg font-semibold leading-none">SplitFlow</div>
+								<div class="text-xs text-slate-400 -mt-0.5">split the bill, simply</div>
+							</div>
+						</a>
+						<nav class="flex items-center gap-3">
+							if strings.ToLower(title) == "login" {
+								<a href="/login" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Accedi</a>
+							} else {
+								<a href="/logout" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
+							}
+						</nav>
+					</div>
+				</header>
+				<main class="flex-1 flex items-center justify-center px-4 py-8">
+					<div class="w-full max-w-4xl">
+						{ children... }
+					</div>
+				</main>
+				<footer class="text-center text-slate-400 text-sm py-6">
+					&copy; { time.Now().Year() } SplitFlow · creato con ❤️
+				</footer>
+			</div>
+		</body>
+	</html>
+}

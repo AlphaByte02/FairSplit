@@ -1,0 +1,40 @@
+services:
+    db:
+        image: postgres:17
+        container_name: postgres
+        environment:
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: splitflow
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+    app:
+        build:
+            context: .
+        environment:
+            DATABASE_URL: postgres://dev:devpass@db:5432/splitty_dev?sslmode=disable
+            PORT: "8080"
+        volumes:
+            - ./:/src
+        ports:
+            - "8080:8080"
+        depends_on:
+            - db
+        command: ["air"]
+
+    adminer:
+        image: adminer:latest
+        container_name: adminer
+        restart: unless-stopped
+        ports:
+            - 8081:8080
+        environment:
+            ADMINER_DESIGN: flat
+            ADMINER_PLUGINS: edit-foreign edit-textarea enum-option json-column tables-filter config menu-links table-indexes-structure table-structure
+        depends_on:
+            - db
+
+volumes:
+    postgres:

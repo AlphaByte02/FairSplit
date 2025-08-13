@@ -1,0 +1,21 @@
+{
+    "eslint.useFlatConfig": true,
+
+    "editor.formatOnSave": true,
+    "[templ]": {
+        "editor.defaultFormatter": "a-h.templ"
+    },
+    "emmet.includeLanguages": {
+        "templ": "html"
+    },
+
+    "go.formatTool": "custom",
+    "go.alternateTools": {
+        "customFormatter": "golines"
+    },
+    "go.formatFlags": ["-m", "120"],
+    "go.inlayHints.constantValues": true,
+
+    "Prettier-SQL.SQLFlavourOverride": "postgresql",
+    "Prettier-SQL.keywordCase": "preserve"
+}
