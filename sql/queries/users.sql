@@ -6,6 +6,7 @@ FROM
 WHERE
     id = $1;
 
+
 -- name: GetUserByUsername :one
 SELECT
     *
@@ -13,6 +14,7 @@ FROM
     users
 WHERE
     username = $1;
+
 
 -- name: CreateUser :one
 INSERT INTO
@@ -22,7 +24,8 @@ VALUES
 RETURNING
     *;
 
+
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE
-  id = $1;
+    id = $1;

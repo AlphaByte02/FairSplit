@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	db "github.com/AlphaByte02/SplitFlow/internal/db"
-	"github.com/AlphaByte02/SplitFlow/internal/server"
+	db "github.com/AlphaByte02/FairSplit/internal/db"
+	"github.com/AlphaByte02/FairSplit/internal/server"
 
 	_ "github.com/joho/godotenv/autoload"
 

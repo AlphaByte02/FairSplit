@@ -1,3 +1,6 @@
+##:schema https://json.schemastore.org/any.json
+#:schema https://raw.githubusercontent.com/air-verse/air/0a3f56961f682c08c2d012dbf828188b4e12e854/air.schema.json
+
 root = "."
 testdata_dir = "testdata"
 tmp_dir = "tmp"
@@ -5,7 +8,7 @@ tmp_dir = "tmp"
 [build]
 args_bin = []
 bin = "./tmp/main"
-cmd = "go tool templ generate && go build -o ./tmp/main ."
+cmd = "go tool templ generate && go build -o ./tmp/main ./cmd/app"
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []
@@ -16,10 +19,10 @@ full_bin = ""
 include_dir = []
 include_ext = ["go", "tpl", "tmpl", "html", "templ"]
 include_file = []
-kill_delay = "0s"
+kill_delay = 500
 log = "build-errors.log"
 poll = false
-poll_interval = 0
+poll_interval = 500
 post_cmd = []
 pre_cmd = []
 rerun = false

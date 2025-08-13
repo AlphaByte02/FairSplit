@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/",
+            "program": "${workspaceFolder}/cmd/app/",
             "args": [],
             "cwd": "${workspaceFolder}/",
             "env": { "PORT": "3000" }

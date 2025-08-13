@@ -32,7 +32,7 @@ func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) 
 const closeSession = `-- name: CloseSession :exec
 UPDATE sessions
 SET
-    is_closed = true
+    is_closed = TRUE
 WHERE
     id = $1
 `
@@ -85,7 +85,9 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 const getSession = `-- name: GetSession :one
 SELECT
     s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at,
-    u.id, u.username, u.created_at, u.updated_at
+    /* sql-formatter-disable */
+    u.id, u.username, u.created_at, u.updated_at -- sql-formatter-disable
+    /* sql-formatter-enable */
 FROM
     sessions s
     JOIN users u ON u.id = s.created_by_id
@@ -123,16 +125,15 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (GetSessionRow, 
 
 const listSessionsForUser = `-- name: ListSessionsForUser :many
 SELECT
-    s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at
+    id, created_by_id, name, is_closed, created_at, updated_at
 FROM
-    sessions s
-    JOIN session_participants sp ON s.id = sp.session_id
+    sessions
 WHERE
-    sp.user_id = $1
+    sessions.created_by_id = $1
 `
 
-func (q *Queries) ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]Session, error) {
-	rows, err := q.db.Query(ctx, listSessionsForUser, userID)
+func (q *Queries) ListSessionsForUser(ctx context.Context, createdByID uuid.UUID) ([]Session, error) {
+	rows, err := q.db.Query(ctx, listSessionsForUser, createdByID)
 	if err != nil {
 		return nil, err
 	}

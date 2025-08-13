@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/AlphaByte02/SplitFlow/handlers"
+	"github.com/AlphaByte02/FairSplit/handlers"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -22,6 +22,8 @@ func (s *Server) RegisterRoutes() {
 	s.Get("/login", handlers.Login)
 	s.Post("/login", handlers.HandleLogin)
 	s.Get("/logout", RequireAuth, handlers.HandleLogout)
+
+	s.Post("/sessions/new", RequireAuth, handlers.HandleSession)
 }
 
 func (s *Server) Start(port string) {

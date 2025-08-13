@@ -1,4 +1,4 @@
-module github.com/AlphaByte02/SplitFlow
+module github.com/AlphaByte02/FairSplit
 
 go 1.24.6
 

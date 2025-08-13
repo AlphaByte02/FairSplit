@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"context"
 	"strings"
 
-	"github.com/AlphaByte02/SplitFlow/internal/db"
-	views "github.com/AlphaByte02/SplitFlow/templates"
+	"github.com/AlphaByte02/FairSplit/internal/db"
+	views "github.com/AlphaByte02/FairSplit/web/templates"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/session"
 	"github.com/google/uuid"
@@ -22,11 +21,11 @@ func HandleLogin(c fiber.Ctx) error {
 
 		var user db.User
 
-		user, err := Q.GetUserByUsername(context.Background(), strings.ToLower(username))
+		user, err := Q.GetUserByUsername(c, strings.ToLower(username))
 		if err != nil {
 			if err == pgx.ErrNoRows {
 				newUserID, _ := uuid.NewV7()
-				user, err = Q.CreateUser(context.Background(), db.CreateUserParams{ID: newUserID, Username: username})
+				user, err = Q.CreateUser(c, db.CreateUserParams{ID: newUserID, Username: username})
 				if err != nil {
 					return err
 				}
@@ -39,7 +38,7 @@ func HandleLogin(c fiber.Ctx) error {
 			return err
 		}
 
-		sess.Set("user_id", user)
+		sess.Set("user", user)
 		sess.Set("authenticated", true)
 
 		if c.Get("HX-Request") == "true" {

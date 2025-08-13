@@ -1,0 +1,27 @@
+package views
+
+import "github.com/AlphaByte02/FairSplit/internal/db"
+
+templ Sessions(sessions []db.Session) {
+	<div id="sessions-list" class="divide-y divide-white/6">
+		<div x-show="numSessions == 0" class="py-6 text-center text-slate-400">Non hai ancora creato nessuna sessione.</div>
+		for _, s := range sessions {
+			@SessionItem(s)
+		}
+	</div>
+}
+
+templ SessionItem(session db.Session) {
+	<div class="py-4 flex items-center justify-between">
+		<div>
+			<div class="font-medium">
+				{ session.Name }
+				if session.IsClosed.Bool {
+					🔒
+				}
+			</div>
+			<div class="text-xs text-slate-400">Aperta il { session.CreatedAt.Time.Format("02/01/2006") }</div>
+		</div>
+		<a href={ "/sessions/" + session.ID.String() } class="px-3 py-1 rounded-md bg-white/6 hover:bg-white/8 text-sm">Visualizza</a>
+	</div>
+}
