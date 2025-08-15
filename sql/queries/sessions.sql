@@ -1,8 +1,8 @@
 -- name: GetSession :one
 SELECT
-    s.*,
     /* sql-formatter-disable */
-    sqlc.embed(u) -- sql-formatter-disable
+    sqlc.embed(s),
+    sqlc.embed(u)
     /* sql-formatter-enable */
 FROM
     sessions s
@@ -29,7 +29,19 @@ RETURNING
     *;
 
 
--- name: AddParticipant :exec
+-- name: ListSessionParticipants :many
+SELECT
+    u.*
+FROM
+    session_participants sp
+    JOIN users u ON u.id = sp.user_id
+WHERE
+    session_id = $1
+ORDER BY
+    u.username;
+
+
+-- name: AddSessionParticipant :exec
 INSERT INTO
     session_participants (session_id, user_id)
 VALUES
@@ -48,3 +60,16 @@ SET
     is_closed = TRUE
 WHERE
     id = $1;
+
+
+-- name: CheckSessionAccess :one
+SELECT
+    EXISTS (
+        SELECT
+            1
+        FROM
+            session_participants
+        WHERE
+            session_id = $1
+            AND user_id = $2
+    ) AS has_access;

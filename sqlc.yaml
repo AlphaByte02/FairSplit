@@ -22,5 +22,14 @@ sql:
                         import: "github.com/google/uuid"
                         type: "UUID"
                         pointer: true
+                  - db_type: "pg_catalog.numeric"
+                    go_type:
+                        import: "github.com/AlphaByte02/FairSplit/internal/types"
+                        type: "Numeric"
+                  - db_type: "text"
+                    nullable: true
+                    go_type:
+                        import: "github.com/AlphaByte02/FairSplit/internal/types"
+                        type: "Text"
                   - column: "users.password"
                     go_struct_tag: 'json:"-"'

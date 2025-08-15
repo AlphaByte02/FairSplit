@@ -5,24 +5,10 @@
 package db
 
 import (
+	"github.com/AlphaByte02/FairSplit/internal/types"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-type Payment struct {
-	ID          uuid.UUID          `json:"id"`
-	SessionID   uuid.UUID          `json:"session_id"`
-	PayerID     uuid.UUID          `json:"payer_id"`
-	Amount      pgtype.Numeric     `json:"amount"`
-	Description pgtype.Text        `json:"description"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-}
-
-type PaymentParticipant struct {
-	PaymentID uuid.UUID `json:"payment_id"`
-	UserID    uuid.UUID `json:"user_id"`
-}
 
 type Session struct {
 	ID          uuid.UUID          `json:"id"`
@@ -36,6 +22,21 @@ type Session struct {
 type SessionParticipant struct {
 	SessionID uuid.UUID `json:"session_id"`
 	UserID    uuid.UUID `json:"user_id"`
+}
+
+type Transaction struct {
+	ID          uuid.UUID          `json:"id"`
+	SessionID   uuid.UUID          `json:"session_id"`
+	PayerID     uuid.UUID          `json:"payer_id"`
+	Amount      types.Numeric      `json:"amount"`
+	Description types.Text         `json:"description"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type TransactionParticipant struct {
+	TransactionID uuid.UUID `json:"transaction_id"`
+	UserID        uuid.UUID `json:"user_id"`
 }
 
 type User struct {

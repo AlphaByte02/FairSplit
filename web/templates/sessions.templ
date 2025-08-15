@@ -1,6 +1,9 @@
 package views
 
-import "github.com/AlphaByte02/FairSplit/internal/db"
+import (
+	"fmt"
+	"github.com/AlphaByte02/FairSplit/internal/db"
+)
 
 templ Sessions(sessions []db.Session) {
 	<div id="sessions-list" class="divide-y divide-white/6">
@@ -23,5 +26,162 @@ templ SessionItem(session db.Session) {
 			<div class="text-xs text-slate-400">Aperta il { session.CreatedAt.Time.Format("02/01/2006") }</div>
 		</div>
 		<a href={ "/sessions/" + session.ID.String() } class="px-3 py-1 rounded-md bg-white/6 hover:bg-white/8 text-sm">Visualizza</a>
+	</div>
+}
+
+templ SessionPage(session db.Session, participants []db.User, transactions []db.ListTransactionsBySessionRow) {
+	@Layout("Session | " + session.Name) {
+		<div x-data="{ openNewTransactionModal: false, openInviteModal: false}">
+			<div class="flex flex-col gap-6 p-6">
+				<!-- Header -->
+				<div class="flex justify-between items-center">
+					<h1 class="text-2xl font-bold text-white">{ session.Name }</h1>
+					<div class="flex gap-2">
+						<button
+							@click="openNewTransactionModal = true"
+							class="px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/30 transition"
+						>
+							+ Transazione
+						</button>
+						<button
+							@click="openInviteModal = true"
+							class="px-3 py-1.5 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-200 hover:bg-sky-500/30 transition"
+						>
+							+ Invita
+						</button>
+					</div>
+				</div>
+				<!-- Lista transazioni -->
+				@TransactionList(transactions)
+			</div>
+			<!-- Modal Nuova Transazione -->
+			<div
+				x-show="openNewTransactionModal"
+				x-transition
+				@click.self="openNewTransactionModal = false"
+				class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+			>
+				<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
+					<h2 class="text-xl font-bold text-white mb-4">Nuova transazione</h2>
+					<form
+						hx-post={ "/sessions/" + session.ID.String() + "/transactions" }
+						hx-target="#transactions-list"
+						hx-swap="outerHTML"
+						@htmx:after-on-load="openNewTransactionModal = false"
+					>
+						<!-- Descrizione -->
+						<input
+							type="text"
+							name="description"
+							placeholder="Descrizione"
+							class="w-full mb-3 p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+							required
+						/>
+						<!-- Importo -->
+						<input
+							type="number"
+							name="amount"
+							placeholder="Importo"
+							step="0.01"
+							min="0.01"
+							class="no-spinner w-full mb-3 p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+							required
+						/>
+						<!-- Per chi è stato pagato -->
+						<div
+							class="mb-4"
+							x-data="{
+								allSelected: false,
+								toggleSelectAll() {
+									const checkboxes = this.$root.querySelectorAll('input[name=paid_for]');
+									this.allSelected = !this.allSelected;
+									checkboxes.forEach(cb => cb.checked = this.allSelected);
+								}
+							}"
+						>
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-gray-300">Pagato per:</span>
+								<button
+									type="button"
+									@click="toggleSelectAll"
+									class="px-3 py-1 rounded-lg border border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 transition"
+								>
+									<span x-text="allSelected ? 'Deseleziona tutti' : 'Seleziona tutti'"></span>
+								</button>
+							</div>
+							@ParticipantList(participants)
+						</div>
+						<!-- Bottoni -->
+						<div class="flex justify-end gap-2">
+							<button
+								type="button"
+								@click="openNewTransactionModal = false"
+								class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg"
+							>
+								Annulla
+							</button>
+							<button
+								type="submit"
+								class="px-4 py-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-lg hover:bg-emerald-500/30"
+							>
+								Aggiungi
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- Modal Invita Utente -->
+			<div
+				x-show="openInviteModal"
+				x-transition
+				@click.self="openInviteModal = false"
+				class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+			>
+				<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
+					<h2 class="text-xl font-bold text-white mb-4">Invita utente</h2>
+					<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#participant-list" hx-swap="outerHTML" @htmx:after-on-load="openInviteModal = false">
+						<input type="text" name="username" placeholder="Username" class="w-full mb-3 p-2 rounded bg-gray-800 text-white" required/>
+						<div class="flex justify-end gap-2">
+							<button type="button" @click="openInviteModal = false" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg">Annulla</button>
+							<button type="submit" class="px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-200 rounded-lg hover:bg-sky-500/30">Invita</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ ParticipantList(participants []db.User) {
+	<div id="participant-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+		for _, p := range participants {
+			<label class="flex items-center gap-2 bg-gray-800/60 backdrop-blur-md p-2 rounded-lg border border-gray-700 text-gray-200 cursor-pointer hover:bg-gray-800/80 transition">
+				<input type="checkbox" name="paid_for" value={ p.ID.String() } class="accent-emerald-500"/>
+				<span class="capitalize">{ p.Username }</span>
+			</label>
+		}
+	</div>
+}
+
+templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
+	<div id="transactions-list" class="flex flex-col gap-3">
+		for _, t := range transactions {
+			@TransactionItem(t)
+		}
+		if len(transactions) == 0 {
+			<div class="text-gray-500 italic">Nessuna transazione ancora.</div>
+		}
+	</div>
+}
+
+templ TransactionItem(transaction db.ListTransactionsBySessionRow) {
+	<div class="backdrop-blur-md bg-white/5 border border-white/10 p-4 rounded-lg shadow-sm">
+		<div class="flex justify-between items-center">
+			<span class="text-white font-medium">{ transaction.Description.String() }</span>
+			<span class="text-sm text-gray-400">{ transaction.CreatedAt.Time.Format("02 Jan 2006 15:04") }</span>
+		</div>
+		<div class="text-gray-300 text-sm mt-1">
+			Pagato da <strong class="capitalize">{ transaction.User.Username }</strong> per 0 persone — { fmt.Sprintf("%s €", transaction.Amount) }
+		</div>
 	</div>
 }

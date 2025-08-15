@@ -24,6 +24,9 @@ func (s *Server) RegisterRoutes() {
 	s.Get("/logout", RequireAuth, handlers.HandleLogout)
 
 	s.Post("/sessions/new", RequireAuth, handlers.HandleSession)
+	s.Get("/sessions/:id", RequireAuth, HaveSessionAccess, handlers.Session)
+	s.Post("/sessions/:id/transactions", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
+	s.Post("/sessions/:id/invite", RequireAuth, HaveSessionAccess, handlers.SessionInvite)
 }
 
 func (s *Server) Start(port string) {

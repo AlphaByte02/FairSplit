@@ -9,24 +9,48 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addParticipant = `-- name: AddParticipant :exec
+const addSessionParticipant = `-- name: AddSessionParticipant :exec
 INSERT INTO
     session_participants (session_id, user_id)
 VALUES
     ($1, $2)
 `
 
-type AddParticipantParams struct {
+type AddSessionParticipantParams struct {
 	SessionID uuid.UUID `json:"session_id"`
 	UserID    uuid.UUID `json:"user_id"`
 }
 
-func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) error {
-	_, err := q.db.Exec(ctx, addParticipant, arg.SessionID, arg.UserID)
+func (q *Queries) AddSessionParticipant(ctx context.Context, arg AddSessionParticipantParams) error {
+	_, err := q.db.Exec(ctx, addSessionParticipant, arg.SessionID, arg.UserID)
 	return err
+}
+
+const checkSessionAccess = `-- name: CheckSessionAccess :one
+SELECT
+    EXISTS (
+        SELECT
+            1
+        FROM
+            session_participants
+        WHERE
+            session_id = $1
+            AND user_id = $2
+    ) AS has_access
+`
+
+type CheckSessionAccessParams struct {
+	SessionID uuid.UUID `json:"session_id"`
+	UserID    uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) CheckSessionAccess(ctx context.Context, arg CheckSessionAccessParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkSessionAccess, arg.SessionID, arg.UserID)
+	var has_access bool
+	err := row.Scan(&has_access)
+	return has_access, err
 }
 
 const closeSession = `-- name: CloseSession :exec
@@ -84,9 +108,9 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 
 const getSession = `-- name: GetSession :one
 SELECT
-    s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at,
     /* sql-formatter-disable */
-    u.id, u.username, u.created_at, u.updated_at -- sql-formatter-disable
+    s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at,
+    u.id, u.username, u.created_at, u.updated_at
     /* sql-formatter-enable */
 FROM
     sessions s
@@ -96,31 +120,63 @@ WHERE
 `
 
 type GetSessionRow struct {
-	ID          uuid.UUID          `json:"id"`
-	CreatedByID uuid.UUID          `json:"created_by_id"`
-	Name        string             `json:"name"`
-	IsClosed    pgtype.Bool        `json:"is_closed"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	User        User               `json:"user"`
+	Session Session `json:"session"`
+	User    User    `json:"user"`
 }
 
 func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (GetSessionRow, error) {
 	row := q.db.QueryRow(ctx, getSession, id)
 	var i GetSessionRow
 	err := row.Scan(
-		&i.ID,
-		&i.CreatedByID,
-		&i.Name,
-		&i.IsClosed,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.Session.ID,
+		&i.Session.CreatedByID,
+		&i.Session.Name,
+		&i.Session.IsClosed,
+		&i.Session.CreatedAt,
+		&i.Session.UpdatedAt,
 		&i.User.ID,
 		&i.User.Username,
 		&i.User.CreatedAt,
 		&i.User.UpdatedAt,
 	)
 	return i, err
+}
+
+const listSessionParticipants = `-- name: ListSessionParticipants :many
+SELECT
+    u.id, u.username, u.created_at, u.updated_at
+FROM
+    session_participants sp
+    JOIN users u ON u.id = sp.user_id
+WHERE
+    session_id = $1
+ORDER BY
+    u.username
+`
+
+func (q *Queries) ListSessionParticipants(ctx context.Context, sessionID uuid.UUID) ([]User, error) {
+	rows, err := q.db.Query(ctx, listSessionParticipants, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listSessionsForUser = `-- name: ListSessionsForUser :many

@@ -13,7 +13,8 @@ CREATE TABLE sessions (
   name TEXT NOT NULL,
   is_closed BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL UNIQUE (created_by_id, name)
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  UNIQUE (created_by_id, name)
 );
 
 
@@ -33,7 +34,7 @@ CREATE INDEX idx_session_participants_session_id ON session_participants (sessio
 CREATE INDEX idx_session_participants_user_id ON session_participants (user_id);
 
 
-CREATE TABLE payments (
+CREATE TABLE transactions (
   id UUID PRIMARY KEY,
   session_id UUID NOT NULL REFERENCES sessions (id) ON DELETE CASCADE,
   payer_id UUID NOT NULL REFERENCES users (id),
@@ -44,20 +45,20 @@ CREATE TABLE payments (
 );
 
 
-CREATE INDEX idx_payments_session_id ON payments (session_id);
+CREATE INDEX idx_transactions_session_id ON transactions (session_id);
 
 
-CREATE INDEX idx_payments_payer_id ON payments (payer_id);
+CREATE INDEX idx_transactions_payer_id ON transactions (payer_id);
 
 
-CREATE TABLE payment_participants (
-  payment_id UUID NOT NULL REFERENCES payments (id) ON DELETE CASCADE,
+CREATE TABLE transaction_participants (
+  transaction_id UUID NOT NULL REFERENCES transactions (id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  PRIMARY KEY (payment_id, user_id)
+  PRIMARY KEY (transaction_id, user_id)
 );
 
 
-CREATE INDEX idx_payment_participants_payment_id ON payment_participants (payment_id);
+CREATE INDEX idx_transaction_participants_transaction_id ON transaction_participants (transaction_id);
 
 
-CREATE INDEX idx_payment_participants_user_id ON payment_participants (user_id);
+CREATE INDEX idx_transaction_participants_user_id ON transaction_participants (user_id);
