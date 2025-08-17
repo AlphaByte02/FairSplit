@@ -101,7 +101,7 @@ func SessionInvite(c fiber.Ctx) error {
 
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
 
-	Render(c, views.PartecipantsModal(session, participants))
+	Render(c, views.PartecipantsModalList(session, participants))
 	Render(c, views.PartecipantsCount(len(participants)))
 	return Render(c, views.NewTransactionModalContent(session, participants, false))
 }
@@ -114,7 +114,7 @@ func SessionKick(c fiber.Ctx) error {
 		if c.Get("HX-Request") == "true" {
 			c.Set(
 				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not remove"}}`,
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non hai i permessi per rimuovere utenti"}}`,
 			)
 		}
 		return c.SendStatus(fiber.StatusForbidden)
@@ -124,12 +124,23 @@ func SessionKick(c fiber.Ctx) error {
 
 	toKickID, _ := fiber.Convert(c.Params("partecipant"), uuid.Parse)
 
+	count, _ := Q.CountTransactionByUser(c, toKickID)
+	if count > 0 {
+		if c.Get("HX-Request") == "true" {
+			c.Set(
+				"HX-Trigger",
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non puoi rimuovere questo utente"}}`,
+			)
+		}
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
 	err := Q.DeleteSessionParticipant(c, toKickID)
 	if err != nil {
 		if c.Get("HX-Request") == "true" {
 			c.Set(
 				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not remove"}}`,
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non puoi rimuovere questo utente"}}`,
 			)
 		}
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -139,4 +150,35 @@ func SessionKick(c fiber.Ctx) error {
 
 	Render(c, views.PartecipantsCount(len(participants)))
 	return Render(c, views.NewTransactionModalContent(session, participants, true))
+}
+
+func SessionClose(c fiber.Ctx) error {
+	user := fiber.Locals[db.User](c, "user")
+	session := fiber.Locals[db.Session](c, "session")
+
+	if session.CreatedByID != user.ID {
+		if c.Get("HX-Request") == "true" {
+			c.Set(
+				"HX-Trigger",
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not close"}}`,
+			)
+		}
+		return c.SendStatus(fiber.StatusForbidden)
+	}
+
+	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+	err := Q.CloseSession(c, session.ID)
+	if err != nil {
+		if c.Get("HX-Request") == "true" {
+			c.Set(
+				"HX-Trigger",
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : ""}}`,
+			)
+		}
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	session.IsClosed = true
+
+	participants, _ := Q.ListSessionParticipants(c, session.ID)
+	return Render(c, views.SessionHeader(session, participants))
 }

@@ -13,8 +13,10 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/favicon"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/session"
+	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -46,10 +48,20 @@ func main() {
 
 	app := fiber.New(fiber.Config{})
 	app.State().Set("queries", queries)
+
 	app.Use(logger.New())
+	app.Use(favicon.New(favicon.Config{
+		File: "./web/assets/favicon.png",
+		URL:  "/favicon.png",
+	}))
+
+	app.Get("/static/*", static.New("./web/assets"))
+
+	appEnv := os.Getenv("ENV")
+	isProd := appEnv == "production"
 
 	sessionMiddleware, store := session.NewWithStore(session.Config{
-		// CookieSecure:    true,             // HTTPS only
+		CookieSecure:    isProd,           // HTTPS only
 		CookieHTTPOnly:  true,             // Prevent XSS
 		CookieSameSite:  "Lax",            // CSRF protection
 		IdleTimeout:     30 * time.Minute, // Session timeout

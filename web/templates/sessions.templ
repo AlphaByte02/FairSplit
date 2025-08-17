@@ -3,6 +3,7 @@ package views
 import (
 	"fmt"
 	"github.com/AlphaByte02/FairSplit/internal/db"
+	"github.com/AlphaByte02/FairSplit/internal/types"
 )
 
 templ Sessions(sessions []db.Session) {
@@ -19,7 +20,7 @@ templ SessionItem(session db.Session) {
 		<div>
 			<div class="font-medium">
 				{ session.Name }
-				if session.IsClosed.Bool {
+				if session.IsClosed {
 					🔒
 				}
 			</div>
@@ -37,8 +38,6 @@ templ PartecipantsCount(count int) {
 
 templ PartecipantsModal(session db.Session, participants []db.User) {
 	<div
-		id="participantsModal"
-		hx-swap-oob="true"
 		x-show="openParticipantsModal"
 		@click.self="openParticipantsModal = false"
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -46,40 +45,7 @@ templ PartecipantsModal(session db.Session, participants []db.User) {
 	>
 		<div class="bg-gray-900/70 border border-gray-700 rounded-2xl shadow-xl w-full max-w-md p-6 relative">
 			<h2 class="text-lg font-semibold text-white mb-4">Partecipanti</h2>
-			<div class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-				for i, p := range participants {
-					<div id={ fmt.Sprintf("participant-%d", i) } class="flex items-center justify-between bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2">
-						<span class="text-gray-200">{ p.Username }</span>
-						if GetUser(ctx).ID == session.CreatedByID && p.ID != session.CreatedByID {
-							<button
-								hx-delete={ "/sessions/" + session.ID.String() + "/kick/" + p.ID.String() }
-								hx-target={ fmt.Sprintf("#participant-%d", i) }
-								hx-trigger="click"
-								hx-swap="outerHTML"
-								class="text-red-400 hover:text-red-300 transition bg-gray-800/60"
-								title="Rimuovi utente"
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									class="h-6 w-6"
-									viewBox="0 0 24 24"
-									fill="none"
-									fill-opacity="0"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								>
-									<polyline points="3 6 5 6 21 6"></polyline>
-									<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-									<path d="M10 11v6"></path>
-									<path d="M14 11v6"></path>
-								</svg>
-							</button>
-						}
-					</div>
-				}
-			</div>
+			@PartecipantsModalList(session, participants)
 			<div class="flex justify-end mt-4">
 				<button
 					@click="openParticipantsModal = false"
@@ -92,60 +58,110 @@ templ PartecipantsModal(session db.Session, participants []db.User) {
 	</div>
 }
 
+templ PartecipantsModalList(session db.Session, participants []db.User) {
+	<div id="participants-modal-list" hx-swap-oob="true" class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+		for i, p := range participants {
+			<div id={ fmt.Sprintf("participant-%d", i) } class="flex items-center justify-between bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2">
+				<span class="text-gray-200 capitalize">{ p.Username }</span>
+				if GetUser(ctx).ID == session.CreatedByID && p.ID != session.CreatedByID {
+					<button
+						hx-delete={ "/sessions/" + session.ID.String() + "/kick/" + p.ID.String() }
+						hx-target={ fmt.Sprintf("#participant-%d", i) }
+						hx-trigger="click"
+						hx-swap="outerHTML"
+						class="text-red-400 hover:text-red-300 transition bg-gray-800/60"
+						title="Rimuovi utente"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6"
+							viewBox="0 0 24 24"
+							fill="none"
+							fill-opacity="0"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<polyline points="3 6 5 6 21 6"></polyline>
+							<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+							<path d="M10 11v6"></path>
+							<path d="M14 11v6"></path>
+						</svg>
+					</button>
+				}
+			</div>
+		}
+	</div>
+}
+
 templ SessionPage(session db.Session, participants []db.User, transactions []db.ListTransactionsBySessionRow) {
 	@Layout("Session | " + session.Name) {
-		<div x-data="{ openNewTransactionModal: false, openInviteModal: false, openParticipantsModal: false}">
-			<div class="flex flex-col gap-6 p-6">
-				<!-- Header -->
-				<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-					<div>
-						<h1 class="text-2xl font-bold text-white">{ session.Name }</h1>
-						@PartecipantsCount(len(participants))
+		@Session(session, participants, transactions)
+	}
+}
+
+templ SessionHeader(session db.Session, participants []db.User) {
+	<div id="session-header" hx-swap-oob="true" class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+		<div>
+			<h1 class="text-2xl font-bold text-white">
+				{ session.Name }
+				if session.IsClosed {
+					🔒
+				}
+			</h1>
+			@PartecipantsCount(len(participants))
+		</div>
+		<div class="mt-4 sm:mt-0 flex gap-2">
+			if !session.IsClosed {
+				<button
+					@click="openNewTransactionModal = true"
+					class="px-4 py-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-lg hover:bg-emerald-500/30"
+				>
+					Nuova transazione
+				</button>
+				<button
+					@click="openInviteModal = true"
+					class="px-4 py-2 bg-blue-500/20 border border-blue-500/40 text-blue-200 rounded-lg hover:bg-blue-500/30"
+				>
+					Invita utente
+				</button>
+			}
+		</div>
+	</div>
+}
+
+templ Session(session db.Session, participants []db.User, transactions []db.ListTransactionsBySessionRow) {
+	<div x-data="{ openNewTransactionModal: false, openInviteModal: false, openParticipantsModal: false}">
+		<div class="flex flex-col gap-6 p-6">
+			<!-- Header -->
+			@SessionHeader(session, participants)
+			<!-- Body -->
+			@SessionBody(session, transactions)
+		</div>
+		<!-- Modal Partecipanti -->
+		@PartecipantsModal(session, participants)
+		<!-- Modal Nuova Transazione -->
+		@NewTransactionModal(session, participants)
+		<!-- Modal Invita Utente -->
+		<div
+			x-show="openInviteModal"
+			x-transition
+			@click.self="openInviteModal = false"
+			class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+		>
+			<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
+				<h2 class="text-xl font-bold text-white mb-4">Invita utente</h2>
+				<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModal" hx-swap="innerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
+					<input type="text" name="username" placeholder="Username" class="w-full mb-3 p-2 rounded bg-gray-800 text-white" required/>
+					<div class="flex justify-end gap-2">
+						<button type="button" @click="openInviteModal = false" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg">Annulla</button>
+						<button type="submit" class="px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-200 rounded-lg hover:bg-sky-500/30">Invita</button>
 					</div>
-					<div class="mt-4 sm:mt-0 flex gap-2">
-						if !session.IsClosed.Bool {
-							<button
-								@click="openNewTransactionModal = true"
-								class="px-4 py-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-lg hover:bg-emerald-500/30"
-							>
-								Nuova transazione
-							</button>
-							<button
-								@click="openInviteModal = true"
-								class="px-4 py-2 bg-blue-500/20 border border-blue-500/40 text-blue-200 rounded-lg hover:bg-blue-500/30"
-							>
-								Invita utente
-							</button>
-						}
-					</div>
-				</div>
-				<!-- Body -->
-				@SessionBody(session, transactions)
-			</div>
-			<!-- Modal Partecipanti -->
-			@PartecipantsModal(session, participants)
-			<!-- Modal Nuova Transazione -->
-			@NewTransactionModal(session, participants)
-			<!-- Modal Invita Utente -->
-			<div
-				x-show="openInviteModal"
-				x-transition
-				@click.self="openInviteModal = false"
-				class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-			>
-				<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
-					<h2 class="text-xl font-bold text-white mb-4">Invita utente</h2>
-					<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModal" hx-swap="innerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
-						<input type="text" name="username" placeholder="Username" class="w-full mb-3 p-2 rounded bg-gray-800 text-white" required/>
-						<div class="flex justify-end gap-2">
-							<button type="button" @click="openInviteModal = false" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg">Annulla</button>
-							<button type="submit" class="px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-200 rounded-lg hover:bg-sky-500/30">Invita</button>
-						</div>
-					</form>
-				</div>
+				</form>
 			</div>
 		</div>
-	}
+	</div>
 }
 
 templ SessionBody(session db.Session, transactions []db.ListTransactionsBySessionRow) {
@@ -202,27 +218,54 @@ templ NewTransactionModalContent(session db.Session, participants []db.User, oob
 			hx-swap="outerHTML"
 			@htmx:after-request="openNewTransactionModal = false; $el.reset()"
 		>
-			<!-- Descrizione -->
-			<input
-				type="text"
-				name="description"
-				placeholder="Descrizione"
-				class="w-full mb-3 p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-				required
-			/>
+			<!-- Pagatore -->
+			<div class="flex justify-center">
+				<div class="relative inline-block">
+					<select
+						name="payer"
+						class="appearance-none px-4 py-2 rounded-xl bg-gray-900/70 border border-gray-700 text-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer transition text-center"
+					>
+						for _, u := range participants {
+							<option
+								value={ u.ID.String() }
+								if u.ID == GetUser(ctx).ID {
+									selected
+								}
+								class="bg-gray-800 text-gray-100"
+							>
+								{ u.Username }
+							</option>
+						}
+					</select>
+				</div>
+			</div>
 			<!-- Importo -->
-			<input
-				type="number"
-				name="amount"
-				placeholder="Importo"
-				step="0.01"
-				min="0.01"
-				class="no-spinner w-full mb-3 p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-				required
-			/>
-			<!-- Per chi è stato pagato -->
+			<div class="mb-4">
+				<label class="block text-gray-300 mb-1">Importo (€)</label>
+				<input
+					type="number"
+					name="amount"
+					placeholder="0.01"
+					min="0.01"
+					step="0.01"
+					class="w-full rounded-lg border border-gray-700 bg-gray-900/60 text-gray-100 px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none no-spinner"
+					required
+				/>
+			</div>
+			<!-- Descrizione -->
+			<div class="mb-6">
+				<label class="block text-gray-300 mb-1">Descrizione</label>
+				<input
+					type="text"
+					name="description"
+					placeholder="eg. spesa"
+					class="w-full rounded-lg border border-gray-700 bg-gray-900/60 text-gray-100 px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+					required
+				/>
+			</div>
+			<!-- Partecipanti  -->
 			<div
-				class="mb-4"
+				class="mb-6"
 				x-data="{
 						allSelected: false,
 						toggleSelectAll() {
@@ -232,7 +275,7 @@ templ NewTransactionModalContent(session db.Session, participants []db.User, oob
 						}
 					}"
 			>
-				<div class="flex items-center justify-between mb-2">
+				<div class="flex items-center justify-between mb-3">
 					<span class="text-gray-300">Pagato per:</span>
 					<button
 						type="button"
@@ -271,6 +314,17 @@ templ NewTransactionModalContent(session db.Session, participants []db.User, oob
 	</div>
 }
 
+func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) types.Numeric {
+	var total types.Numeric
+	total.Scan("0")
+
+	for _, t := range transactions {
+		total, _ = total.Add(t.Amount)
+	}
+
+	return total
+}
+
 templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
 	<div id="transactions-list" class="flex flex-col gap-3">
 		for _, t := range transactions {
@@ -279,6 +333,12 @@ templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
 		if len(transactions) == 0 {
 			<div class="text-gray-500 italic">Nessuna transazione ancora.</div>
 		}
+		<div class="mt-2 p-4 text-right">
+			<span class="text-gray-300">Totale:</span>
+			<span class="text-emerald-400 font-semibold text-lg tracking-wide">
+				€{ getTransactionsTotal(transactions).String() }
+			</span>
+		</div>
 	</div>
 }
 
@@ -286,7 +346,7 @@ templ TransactionItem(transaction db.ListTransactionsBySessionRow) {
 	<div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between hover:bg-gray-800/80 transition">
 		<div class="flex flex-col space-y-1">
 			<span class="text-gray-200 font-medium">{ transaction.Description.String() }</span>
-			<span class="text-gray-300 text-sm capitalize">{ transaction.User.Username } ha pagato </span>
+			<span class="text-gray-300 text-sm"><span class="font-medium capitalize">{ transaction.User.Username }</span> ha pagato</span>
 			<div x-data="{ open: false }" class="relative inline-block">
 				per
 				<span

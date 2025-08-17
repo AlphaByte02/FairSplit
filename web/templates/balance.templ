@@ -7,14 +7,16 @@ import (
 	"github.com/AlphaByte02/FairSplit/internal/types"
 )
 
+type IntermediateBalanceTransaction struct {
+	Transaction db.Transaction
+	Payer       db.User
+	Amount      types.Numeric
+}
+
 type IntermediateBalanceParticipant struct {
-	User         db.User
-	Transactions []struct {
-		Transaction db.Transaction
-		Payer       db.User
-		Amount      types.Numeric
-	}
-	Sum types.Numeric
+	Debtor       db.User
+	Transactions []IntermediateBalanceTransaction
+	Sum          types.Numeric
 }
 
 templ IntermediateBalance(session db.Session, participants []IntermediateBalanceParticipant) {
@@ -24,7 +26,7 @@ templ IntermediateBalance(session db.Session, participants []IntermediateBalance
 				hx-get={ "/sessions/" + session.ID.String() + "?onlyBody=true" }
 				hx-target="#session-body"
 				hx-swap="innerHTML"
-				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
+				class="px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-200 hover:bg-orange-500/30 transition shadow-md backdrop-blur"
 			>
 				Transazioni
 			</button>
@@ -42,7 +44,7 @@ templ IntermediateBalance(session db.Session, participants []IntermediateBalance
 		for _, p := range participants {
 			<div class="bg-gray-800/60 border border-gray-700 rounded-2xl shadow-md p-5 flex flex-col">
 				<!-- Titolo -->
-				<h3 class="text-lg font-semibold text-gray-100 mb-4">{ p.User.Username }</h3>
+				<h3 class="text-lg font-semibold text-gray-100 mb-4">{ p.Debtor.Username }</h3>
 				<!-- Lista transazioni -->
 				<div class="flex-1 space-y-3">
 					for _, tr := range p.Transactions {
@@ -70,9 +72,23 @@ templ IntermediateBalance(session db.Session, participants []IntermediateBalance
 	</div>
 }
 
-templ FinalBalance(session db.Session) {
+type BalanceTransferItem struct {
+	From   db.User
+	To     db.User
+	Amount float64
+}
+
+templ FinalBalance(session db.Session, transfers []BalanceTransferItem) {
 	<div class="flex sm:justify-around items-center mb-2">
 		<div class="flex space-x-3">
+			<button
+				hx-get={ "/sessions/" + session.ID.String() + "?onlyBody=true" }
+				hx-target="#session-body"
+				hx-swap="innerHTML"
+				class="px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-200 hover:bg-orange-500/30 transition shadow-md backdrop-blur"
+			>
+				Transazioni
+			</button>
 			<button
 				hx-get={ "/sessions/" + session.ID.String() + "/balances/intermediate" }
 				hx-target="#session-body"
@@ -81,14 +97,34 @@ templ FinalBalance(session db.Session) {
 			>
 				Conti intermedi
 			</button>
-			<button
-				hx-get={ "/sessions/" + session.ID.String() + "?onlyBody=true" }
-				hx-target="#session-body"
-				hx-swap="innerHTML"
-				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
-			>
-				Transazioni
-			</button>
 		</div>
+	</div>
+	<div class="space-y-4 mb-4">
+		if len(transfers) == 0 {
+			<p class="text-gray-400">Nessun debito da regolare 🎉</p>
+		} else {
+			for _, tr := range transfers {
+				<div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between shadow-md">
+					<div>
+						<span class="text-gray-200 font-medium capitalize">{ tr.From.Username }</span>
+						<span class="text-gray-400">deve a </span>
+						<span class="text-gray-200 font-medium capitalize">{ tr.To.Username }</span>
+					</div>
+					<span class="text-emerald-400 font-bold text-lg tracking-wide">€{ fmt.Sprintf("%.02f", tr.Amount) }</span>
+				</div>
+			}
+		}
+	</div>
+	<div class="flex justify-around items-center">
+		if GetUser(ctx).ID == session.CreatedByID && !session.IsClosed {
+			<form hx-post={ "/sessions/" + session.ID.String() + "/close" } hx-swap="outerHTML">
+				<button
+					type="submit"
+					class="px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-200 hover:bg-red-500/30"
+				>
+					Chiudi sessione
+				</button>
+			</form>
+		}
 	</div>
 }

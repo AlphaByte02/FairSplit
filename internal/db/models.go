@@ -14,7 +14,7 @@ type Session struct {
 	ID          uuid.UUID          `json:"id"`
 	CreatedByID uuid.UUID          `json:"created_by_id"`
 	Name        string             `json:"name"`
-	IsClosed    pgtype.Bool        `json:"is_closed"`
+	IsClosed    bool               `json:"is_closed"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -28,10 +27,10 @@ type Numeric struct {
 	pgtype.Numeric
 }
 
-var _ encoding.TextUnmarshaler = (*Numeric)(nil) // Verifica interfaccia
+var _ encoding.TextUnmarshaler = (*Numeric)(nil)
 
 func (n *Numeric) UnmarshalText(text []byte) error {
-	return n.Scan(string(text)) // Usa Scan per convertire la stringa in Numeric
+	return n.Scan(string(text))
 }
 
 func (n Numeric) String() string {
@@ -76,17 +75,12 @@ func (n Numeric) String() string {
 	return intStr[:pos] + "." + intStr[pos:]
 }
 
-func (n Numeric) ToFloat64() (float64, error) {
-	if !n.Valid {
-		return 0, fmt.Errorf("cannot convert invalid (NULL) numeric to float64")
-	}
-
-	str := n.String()
-	f, err := strconv.ParseFloat(str, 64)
+func (n Numeric) Float64() (float64, error) {
+	f8, err := n.Float64Value()
 	if err != nil {
 		return 0, fmt.Errorf("failed to convert numeric to float64: %w", err)
 	}
-	return f, nil
+	return f8.Float64, nil
 }
 
 func (n Numeric) Add(other Numeric) (Numeric, error) {

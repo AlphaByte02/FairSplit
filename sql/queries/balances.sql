@@ -22,25 +22,62 @@ ORDER BY
     t.id;
 
 
--- TODO
--- name: GetFinalBalances :many
-SELECT
-    ts.id_soggetto AS id_debitore,
-    t.id_pagante AS id_creditore,
-    SUM(t.importo::numeric / cnt.tot_partecipanti) AS spesa
-FROM
-    transazioni t
-    JOIN soggetti ts ON ts.id_transazione = t.id
-    AND ts.id_soggetto <> t.id_pagante
-    JOIN (
+-- name: GetSessionBalances :many
+WITH
+    tx_info AS (
         SELECT
-            s2.id_transazione,
-            COUNT(*) AS tot_partecipanti
+            id,
+            amount,
+            (
+                SELECT
+                    COUNT(*)
+                FROM
+                    transaction_participants tp
+                WHERE
+                    tp.transaction_id = t.id
+            ) AS num_parts
         FROM
-            soggetti s2
+            transactions t
+        WHERE
+            t.session_id = $1
+    ),
+    paid AS (
+        SELECT
+            t.payer_id AS user_id,
+            SUM(t.amount) AS total_paid
+        FROM
+            transactions t
+        WHERE
+            t.session_id = $1
         GROUP BY
-            s2.id_transazione
-    ) cnt ON cnt.id_transazione = t.id
-GROUP BY
-    ts.id_soggetto,
-    t.id_pagante
+            t.payer_id
+    ),
+    consumed AS (
+        SELECT
+            tp.user_id,
+            SUM(tx.amount / tx.num_parts::numeric) AS total_consumed
+        FROM
+            transaction_participants tp
+            JOIN tx_info tx ON tx.id = tp.transaction_id
+        GROUP BY
+            tp.user_id
+    ),
+    balances AS (
+        SELECT
+            sp.user_id,
+            CAST(COALESCE(p.total_paid, 0) - COALESCE(c.total_consumed, 0) AS numeric(12, 2)) AS balance
+        FROM
+            session_participants sp
+            LEFT JOIN paid p ON p.user_id = sp.user_id
+            LEFT JOIN consumed c ON c.user_id = sp.user_id
+        WHERE
+            sp.session_id = $1
+    )
+SELECT
+    /* sql-formatter-disable */
+    sqlc.embed(u),
+    /* sql-formatter-enable */
+    b.balance
+FROM
+    balances b
+    LEFT JOIN users u ON b.user_id = u.id;

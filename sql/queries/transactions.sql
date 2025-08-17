@@ -61,3 +61,12 @@ VALUES
 DELETE FROM transactions
 WHERE
     id = $1;
+
+
+-- name: CountTransactionByUser :one
+SELECT
+    COUNT(tp.*) AS "count"
+FROM
+    transaction_participants tp
+WHERE
+    tp.user_id = $1;

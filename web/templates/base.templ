@@ -20,64 +20,29 @@ templ Layout(title string) {
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width,initial-scale=1"/>
+			<link rel="icon" type="image/x-icon" href="/favicon.png"/>
 			<title>SplitFlow - { title }</title>
-			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 			<script>
 				window.__unocss = {
 					preflight: true
 				}
 			</script>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 			<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
 			<style>
-				[un-cloak] {
+				body[un-cloak] {
+					background-color: #1e293b;
+				}
+				div[un-cloak] {
 					display: none;
 				}
 			</style>
 			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<style>
-				.fade-in {
-					animation: fadeIn .24s ease;
-				}
-
-				@keyframes fadeIn {
-					from {
-						opacity: 0;
-						transform: translateY(6px);
-					}
-
-					to {
-						opacity: 1;
-						transform: translateY(0);
-					}
-				}
-			</style>
-			<style>
-				.no-spinner::-webkit-outer-spin-button,
-				.no-spinner::-webkit-inner-spin-button {
-					-webkit-appearance: none;
-					appearance: none;
-					margin: 0;
-				}
-				.no-spinner {
-					-moz-appearance: textfield;
-					appearance: textfield;
-				}
-
-				::-webkit-scrollbar {
-					width: 6px;
-				}
-				::-webkit-scrollbar-track {
-					background: transparent;
-				}
-				::-webkit-scrollbar-thumb {
-					background-color: #374151; /* gray-700 */
-					border-radius: 9999px;
-				}
-			</style>
+			<link rel="stylesheet" href="/static/css/globals.css"/>
 		</head>
 		<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased" un-cloak>
-			<div class="min-h-screen flex flex-col" x-data>
+			<div class="min-h-screen flex flex-col" un-cloak x-data>
 				<header class="bg-transparent backdrop-blur-sm border-b border-white/6">
 					<div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
 						<a href="/" class="flex items-center gap-3">
@@ -89,17 +54,19 @@ templ Layout(title string) {
 								<div class="text-xs text-slate-400 -mt-0.5">split the bill, simply</div>
 							</div>
 						</a>
-						<nav class="flex items-center gap-3">
+						<nav class="flex items-center">
 							if GetUser(ctx).Username == "" {
 								<a href="/login" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Accedi</a>
 							} else {
-								<a href="/logout" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
+								<span class="text-gray-300 mr-4 capitalize">{ GetUser(ctx).Username }</span>
+								<div class="h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>
+								<a href="/logout" class="ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
 							}
 						</nav>
 					</div>
 				</header>
 				<main class="flex-1 flex items-center justify-center px-4 py-8">
-					<div class="w-full max-w-4xl">
+					<div class="w-full max-w-4xl" id="main-content">
 						{ children... }
 					</div>
 				</main>

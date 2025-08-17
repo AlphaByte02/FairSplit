@@ -30,6 +30,22 @@ func (q *Queries) AddTransactionParticipant(ctx context.Context, arg AddTransact
 	return err
 }
 
+const countTransactionByUser = `-- name: CountTransactionByUser :one
+SELECT
+    COUNT(tp.*) AS "count"
+FROM
+    transaction_participants tp
+WHERE
+    tp.user_id = $1
+`
+
+func (q *Queries) CountTransactionByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countTransactionByUser, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO
     transactions (id, session_id, payer_id, amount, description)

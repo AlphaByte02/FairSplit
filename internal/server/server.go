@@ -25,13 +25,15 @@ func (s *Server) RegisterRoutes() {
 
 	s.Post("/sessions/new", RequireAuth, handlers.HandleSession)
 	s.Get("/sessions/:id", RequireAuth, HaveSessionAccess, handlers.Session)
-	s.Get("/sessions/:id/balances/intermediate", RequireAuth, HaveSessionAccess, handlers.BalancesIntermediate)
-	s.Get("/sessions/:id/balances/final", RequireAuth, HaveSessionAccess, handlers.BalancesFinal)
-	s.Post("/sessions/:id/close", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
-	s.Post("/sessions/:id/transactions", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
-	s.Delete("/sessions/:id/transactions/:transaction", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
+	s.Post("/sessions/:id/close", RequireAuth, HaveSessionAccess, handlers.SessionClose)
 	s.Post("/sessions/:id/invite", RequireAuth, HaveSessionAccess, handlers.SessionInvite)
 	s.Delete("/sessions/:id/kick/:partecipant", RequireAuth, HaveSessionAccess, handlers.SessionKick)
+
+	s.Post("/sessions/:id/transactions", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
+	s.Delete("/sessions/:id/transactions/:transaction", RequireAuth, HaveSessionAccess, handlers.DeleteTransaction)
+
+	s.Get("/sessions/:id/balances/intermediate", RequireAuth, HaveSessionAccess, handlers.BalancesIntermediate)
+	s.Get("/sessions/:id/balances/final", RequireAuth, HaveSessionAccess, handlers.BalancesFinal)
 }
 
 func (s *Server) Start(port string) {

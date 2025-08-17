@@ -32,11 +32,11 @@ func DeleteTransaction(c fiber.Ctx) error {
 }
 
 func HandleTransaction(c fiber.Ctx) error {
-	user := fiber.Locals[db.User](c, "user")
 	session := fiber.Locals[db.Session](c, "session")
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
 	var transactionParams struct {
+		Payer       uuid.UUID     `json:"payer" form:"payer"`
 		Amount      types.Numeric `json:"amount" form:"amount"`
 		Description types.Text    `json:"description" form:"description"`
 		PaidFor     []string      `json:"paid_for" form:"paid_for"`
@@ -57,7 +57,7 @@ func HandleTransaction(c fiber.Ctx) error {
 	_, err = Q.CreateTransaction(c, db.CreateTransactionParams{
 		ID:          newTransactionID,
 		SessionID:   session.ID,
-		PayerID:     user.ID,
+		PayerID:     transactionParams.Payer,
 		Amount:      transactionParams.Amount,
 		Description: transactionParams.Description,
 	})

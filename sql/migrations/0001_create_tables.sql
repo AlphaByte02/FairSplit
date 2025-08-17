@@ -11,7 +11,7 @@ CREATE TABLE sessions (
   id UUID PRIMARY KEY,
   created_by_id UUID NOT NULL REFERENCES users (id),
   name TEXT NOT NULL,
-  is_closed BOOLEAN DEFAULT FALSE,
+  is_closed BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   UNIQUE (created_by_id, name)
