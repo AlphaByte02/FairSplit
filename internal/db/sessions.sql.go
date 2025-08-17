@@ -106,6 +106,17 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteSessionParticipant = `-- name: DeleteSessionParticipant :exec
+DELETE FROM session_participants
+WHERE
+    user_id = $1
+`
+
+func (q *Queries) DeleteSessionParticipant(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSessionParticipant, userID)
+	return err
+}
+
 const getSession = `-- name: GetSession :one
 SELECT
     /* sql-formatter-disable */
@@ -181,15 +192,16 @@ func (q *Queries) ListSessionParticipants(ctx context.Context, sessionID uuid.UU
 
 const listSessionsForUser = `-- name: ListSessionsForUser :many
 SELECT
-    id, created_by_id, name, is_closed, created_at, updated_at
+    s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at
 FROM
-    sessions
+    sessions s
+    JOIN session_participants sp ON s.id = sp.session_id
 WHERE
-    sessions.created_by_id = $1
+    sp.user_id = $1
 `
 
-func (q *Queries) ListSessionsForUser(ctx context.Context, createdByID uuid.UUID) ([]Session, error) {
-	rows, err := q.db.Query(ctx, listSessionsForUser, createdByID)
+func (q *Queries) ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]Session, error) {
+	rows, err := q.db.Query(ctx, listSessionsForUser, userID)
 	if err != nil {
 		return nil, err
 	}

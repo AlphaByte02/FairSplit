@@ -1,0 +1,94 @@
+package views
+
+import (
+	"fmt"
+
+	"github.com/AlphaByte02/FairSplit/internal/db"
+	"github.com/AlphaByte02/FairSplit/internal/types"
+)
+
+type IntermediateBalanceParticipant struct {
+	User         db.User
+	Transactions []struct {
+		Transaction db.Transaction
+		Payer       db.User
+		Amount      types.Numeric
+	}
+	Sum types.Numeric
+}
+
+templ IntermediateBalance(session db.Session, participants []IntermediateBalanceParticipant) {
+	<div class="flex sm:justify-around items-center mb-2">
+		<div class="flex space-x-3">
+			<button
+				hx-get={ "/sessions/" + session.ID.String() + "?onlyBody=true" }
+				hx-target="#session-body"
+				hx-swap="innerHTML"
+				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
+			>
+				Transazioni
+			</button>
+			<button
+				hx-get={ "/sessions/" + session.ID.String() + "/balances/final" }
+				hx-target="#session-body"
+				hx-swap="innerHTML"
+				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
+			>
+				Conti finali
+			</button>
+		</div>
+	</div>
+	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		for _, p := range participants {
+			<div class="bg-gray-800/60 border border-gray-700 rounded-2xl shadow-md p-5 flex flex-col">
+				<!-- Titolo -->
+				<h3 class="text-lg font-semibold text-gray-100 mb-4">{ p.User.Username }</h3>
+				<!-- Lista transazioni -->
+				<div class="flex-1 space-y-3">
+					for _, tr := range p.Transactions {
+						<div class="bg-gray-900/50 rounded-lg p-3 border border-gray-700">
+							<div class="flex justify-between items-center">
+								<span class="text-sm text-gray-300">
+									{ tr.Payer.Username } • { tr.Transaction.Description.String() }
+								</span>
+								<span class="font-semibold">
+									{ fmt.Sprintf("€%s", tr.Amount) }
+								</span>
+							</div>
+						</div>
+					}
+				</div>
+				<!-- Totale -->
+				<div class="border-t border-gray-700 mt-4 pt-3 flex justify-between items-center">
+					<span class="text-gray-400 text-sm">Totale dovuto</span>
+					<span class="font-bold text-lg">
+						{ fmt.Sprintf("€%s", p.Sum) }
+					</span>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ FinalBalance(session db.Session) {
+	<div class="flex sm:justify-around items-center mb-2">
+		<div class="flex space-x-3">
+			<button
+				hx-get={ "/sessions/" + session.ID.String() + "/balances/intermediate" }
+				hx-target="#session-body"
+				hx-swap="innerHTML"
+				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
+			>
+				Conti intermedi
+			</button>
+			<button
+				hx-get={ "/sessions/" + session.ID.String() + "?onlyBody=true" }
+				hx-target="#session-body"
+				hx-swap="innerHTML"
+				class="px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 hover:bg-gray-700/70 transition shadow-md backdrop-blur"
+			>
+				Transazioni
+			</button>
+		</div>
+	</div>
+}

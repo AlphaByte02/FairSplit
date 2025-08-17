@@ -13,11 +13,12 @@ WHERE
 
 -- name: ListSessionsForUser :many
 SELECT
-    *
+    s.*
 FROM
-    sessions
+    sessions s
+    JOIN session_participants sp ON s.id = sp.session_id
 WHERE
-    sessions.created_by_id = $1;
+    sp.user_id = $1;
 
 
 -- name: CreateSession :one
@@ -46,6 +47,12 @@ INSERT INTO
     session_participants (session_id, user_id)
 VALUES
     ($1, $2);
+
+
+-- name: DeleteSessionParticipant :exec
+DELETE FROM session_participants
+WHERE
+    user_id = $1;
 
 
 -- name: DeleteSession :exec

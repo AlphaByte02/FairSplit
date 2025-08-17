@@ -68,6 +68,17 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 	return i, err
 }
 
+const deleteTransaction = `-- name: DeleteTransaction :exec
+DELETE FROM transactions
+WHERE
+    id = $1
+`
+
+func (q *Queries) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTransaction, id)
+	return err
+}
+
 const listTransactions = `-- name: ListTransactions :many
 SELECT
     /* sql-formatter-disable */
@@ -124,26 +135,42 @@ const listTransactionsBySession = `-- name: ListTransactionsBySession :many
 SELECT
     t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
     /* sql-formatter-disable */
-    payer.id, payer.username, payer.created_at, payer.updated_at
+    payer.id, payer.username, payer.created_at, payer.updated_at,
     /* sql-formatter-enable */
+    ARRAY_AGG(DISTINCT u.username)::TEXT[] AS participants
 FROM
     transactions t
-    JOIN users AS payer ON payer.id = t.payer_id
+    JOIN users payer ON payer.id = t.payer_id
+    LEFT JOIN transaction_participants tp ON tp.transaction_id = t.id
+    LEFT JOIN users u ON u.id = tp.user_id
 WHERE
     t.session_id = $1
+GROUP BY
+    t.id,
+    t.session_id,
+    t.payer_id,
+    t.amount,
+    t.description,
+    t.created_at,
+    t.updated_at,
+    payer.id,
+    payer.username,
+    payer.created_at,
+    payer.updated_at
 ORDER BY
     t.created_at DESC
 `
 
 type ListTransactionsBySessionRow struct {
-	ID          uuid.UUID          `json:"id"`
-	SessionID   uuid.UUID          `json:"session_id"`
-	PayerID     uuid.UUID          `json:"payer_id"`
-	Amount      types.Numeric      `json:"amount"`
-	Description types.Text         `json:"description"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	User        User               `json:"user"`
+	ID           uuid.UUID          `json:"id"`
+	SessionID    uuid.UUID          `json:"session_id"`
+	PayerID      uuid.UUID          `json:"payer_id"`
+	Amount       types.Numeric      `json:"amount"`
+	Description  types.Text         `json:"description"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	User         User               `json:"user"`
+	Participants []string           `json:"participants"`
 }
 
 func (q *Queries) ListTransactionsBySession(ctx context.Context, sessionID uuid.UUID) ([]ListTransactionsBySessionRow, error) {
@@ -167,6 +194,7 @@ func (q *Queries) ListTransactionsBySession(ctx context.Context, sessionID uuid.
 			&i.User.Username,
 			&i.User.CreatedAt,
 			&i.User.UpdatedAt,
+			&i.Participants,
 		); err != nil {
 			return nil, err
 		}

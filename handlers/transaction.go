@@ -8,6 +8,29 @@ import (
 	"github.com/google/uuid"
 )
 
+func DeleteTransaction(c fiber.Ctx) error {
+	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+
+	toDeleteID, _ := fiber.Convert(c.Params("transaction"), uuid.Parse)
+
+	err := Q.DeleteTransaction(c, toDeleteID)
+	if err != nil {
+		if c.Get("HX-Request") == "true" {
+			c.Set(
+				"HX-Trigger",
+				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not remove"}}`,
+			)
+		}
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	// session := fiber.Locals[db.Session](c, "session")
+	// transactions, _ := Q.ListTransactionsBySession(c, session.ID)
+	// return Render(c, views.TransactionList(transactions))
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
 func HandleTransaction(c fiber.Ctx) error {
 	user := fiber.Locals[db.User](c, "user")
 	session := fiber.Locals[db.Session](c, "session")
@@ -47,6 +70,21 @@ func HandleTransaction(c fiber.Ctx) error {
 		}
 
 		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	for _, partecipantUUID := range transactionParams.PaidFor {
+		pUUID, err := uuid.Parse(partecipantUUID)
+		if err != nil {
+			return err
+		}
+
+		err = Q.AddTransactionParticipant(
+			c,
+			db.AddTransactionParticipantParams{TransactionID: newTransactionID, UserID: pUUID},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	transactions, _ := Q.ListTransactionsBySession(c, session.ID)

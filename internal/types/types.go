@@ -3,6 +3,8 @@ package types
 import (
 	"encoding"
 	"fmt"
+	"math"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -85,6 +87,123 @@ func (n Numeric) ToFloat64() (float64, error) {
 		return 0, fmt.Errorf("failed to convert numeric to float64: %w", err)
 	}
 	return f, nil
+}
+
+func (n Numeric) Add(other Numeric) (Numeric, error) {
+	if !n.Valid || !other.Valid {
+		return Numeric{}, fmt.Errorf("cannot add invalid (NULL) numeric values")
+	}
+
+	aInt := new(big.Int).Set(n.Int)
+	bInt := new(big.Int).Set(other.Int)
+	aExp := n.Exp
+	bExp := other.Exp
+
+	resultExp := min(bExp, aExp)
+
+	if aExp > resultExp {
+		diff := aExp - resultExp
+		aInt.Mul(aInt, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(diff)), nil))
+	}
+	if bExp > resultExp {
+		diff := bExp - resultExp
+		bInt.Mul(bInt, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(diff)), nil))
+	}
+
+	resultInt := new(big.Int).Add(aInt, bInt)
+
+	return Numeric{
+		Numeric: pgtype.Numeric{
+			Int:   resultInt,
+			Exp:   resultExp,
+			Valid: true,
+		},
+	}, nil
+}
+
+func (n Numeric) Sub(other Numeric) (Numeric, error) {
+	if !n.Valid || !other.Valid {
+		return Numeric{}, fmt.Errorf("cannot subtract invalid (NULL) numeric values")
+	}
+
+	aInt := new(big.Int).Set(n.Int)
+	bInt := new(big.Int).Set(other.Int)
+	aExp := n.Exp
+	bExp := other.Exp
+
+	resultExp := min(bExp, aExp)
+
+	if aExp > resultExp {
+		diff := aExp - resultExp
+		aInt.Mul(aInt, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(diff)), nil))
+	}
+	if bExp > resultExp {
+		diff := bExp - resultExp
+		bInt.Mul(bInt, new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(diff)), nil))
+	}
+	resultInt := new(big.Int).Sub(aInt, bInt)
+	return Numeric{
+		Numeric: pgtype.Numeric{
+			Int:   resultInt,
+			Exp:   resultExp,
+			Valid: true,
+		},
+	}, nil
+}
+
+func (n Numeric) Mul(other Numeric) (Numeric, error) {
+	if !n.Valid || !other.Valid {
+		return Numeric{}, fmt.Errorf("cannot multiply invalid (NULL) numeric values")
+	}
+
+	resultInt := new(big.Int).Mul(n.Int, other.Int)
+	resultExp := n.Exp + other.Exp
+
+	return Numeric{
+		Numeric: pgtype.Numeric{
+			Int:   resultInt,
+			Exp:   resultExp,
+			Valid: true,
+		},
+	}, nil
+}
+
+func (n Numeric) Div(other Numeric, precision int32) (Numeric, error) {
+	if !n.Valid || !other.Valid {
+		return Numeric{}, fmt.Errorf("cannot divide invalid (NULL) numeric values")
+	}
+	if other.Int.Cmp(big.NewInt(0)) == 0 {
+		return Numeric{}, fmt.Errorf("division by zero")
+	}
+
+	aRat := new(big.Rat).SetInt(n.Int)
+	bRat := new(big.Rat).SetInt(other.Int)
+
+	aExp := n.Exp
+	bExp := other.Exp
+	expDiff := aExp - bExp
+	if expDiff != 0 {
+		scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(math.Abs(float64(expDiff)))), nil)
+		if expDiff > 0 {
+			aRat.Mul(aRat, new(big.Rat).SetInt(scale))
+		} else {
+			bRat.Mul(bRat, new(big.Rat).SetInt(scale))
+		}
+	}
+
+	resultRat := new(big.Rat).Quo(aRat, bRat)
+
+	scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(precision)), nil)
+	resultRat.Mul(resultRat, new(big.Rat).SetInt(scale))
+	resultInt := new(big.Int).Quo(resultRat.Num(), resultRat.Denom())
+
+	return Numeric{
+		Numeric: pgtype.Numeric{
+			Int:   resultInt,
+			Exp:   -precision,
+			Valid: true,
+		},
+	}, nil
 }
 
 // Wrapper per pgtype.Text

@@ -2,13 +2,28 @@
 SELECT
     t.*,
     /* sql-formatter-disable */
-    sqlc.embed(payer)
+    sqlc.embed(payer),
     /* sql-formatter-enable */
+    ARRAY_AGG(DISTINCT u.username)::TEXT[] AS participants
 FROM
     transactions t
-    JOIN users AS payer ON payer.id = t.payer_id
+    JOIN users payer ON payer.id = t.payer_id
+    LEFT JOIN transaction_participants tp ON tp.transaction_id = t.id
+    LEFT JOIN users u ON u.id = tp.user_id
 WHERE
     t.session_id = $1
+GROUP BY
+    t.id,
+    t.session_id,
+    t.payer_id,
+    t.amount,
+    t.description,
+    t.created_at,
+    t.updated_at,
+    payer.id,
+    payer.username,
+    payer.created_at,
+    payer.updated_at
 ORDER BY
     t.created_at DESC;
 
@@ -40,3 +55,9 @@ INSERT INTO
     transaction_participants (transaction_id, user_id)
 VALUES
     ($1, $2);
+
+
+-- name: DeleteTransaction :exec
+DELETE FROM transactions
+WHERE
+    id = $1;
