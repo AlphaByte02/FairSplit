@@ -81,7 +81,7 @@ func Layout(title string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if !isProd(ctx) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n\t\t\t\t\twindow.__unocss = {\n\t\t\t\t\t\tpreflight: true\n\t\t\t\t\t}\n\t\t\t\t</script> <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script> <style>\n\t\t\t\t\tbody[un-cloak] {\n\t\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t\t}\n\t\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\t\tdisplay: none;\n\t\t\t\t\t}\n\t\t\t\t</style>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script>\n\t\t\t\t\twindow.__unocss = {\n\t\t\t\t\t\tpreflight: true\n\t\t\t\t\t}\n\t\t\t\t</script> <script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script> <style>\n\t\t\t\t\tbody[un-cloak] {\n\t\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t\t}\n\t\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\t\tdisplay: none;\n\t\t\t\t\t}\n\t\t\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

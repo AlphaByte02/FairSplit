@@ -37,12 +37,12 @@ templ Layout(title string) {
 			<meta property="og:locale" content="it_IT"/>
 			<title>SplitFlow { title }</title>
 			if !isProd(ctx) {
+				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 				<script>
 					window.__unocss = {
 						preflight: true
 					}
 				</script>
-				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 				<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
 				<style>
 					body[un-cloak] {

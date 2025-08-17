@@ -10,9 +10,10 @@ FROM node:lts-alpine AS unocss-builder
 WORKDIR /src
 
 COPY ./web/ ./web/
+COPY ./uno.config.js ./
 
-RUN npm install -g @unocss/cli
-RUN unocss "web/**/*.templ" -o /src/build/uno.css --minify
+RUN npm install unocss @unocss/preset-wind4 @unocss/reset
+RUN npm exec unocss -- -c ./uno.config.js -o /src/build/uno.css --minify --preflights
 
 FROM gcr.io/distroless/static-debian12
 WORKDIR /app
