@@ -76,12 +76,12 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><script>\n\t\t\t\twindow.__unocss = {\n\t\t\t\t\tpreflight: true\n\t\t\t\t}\n\t\t\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !isProd(ctx) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n\t\t\t\t\twindow.__unocss = {\n\t\t\t\t\t\tpreflight: true\n\t\t\t\t\t}\n\t\t\t\t</script> <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script> <style>\n\t\t\t\t\tbody[un-cloak] {\n\t\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t\t}\n\t\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\t\tdisplay: none;\n\t\t\t\t\t}\n\t\t\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -91,7 +91,7 @@ func Layout(title string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<style>\n\t\t\t\tbody[un-cloak] {\n\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t}\n\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/globals.css\"></head><body class=\"min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased\" un-cloak><div class=\"min-h-screen flex flex-col\" un-cloak x-data><header class=\"bg-transparent backdrop-blur-sm border-b border-white/6\"><div class=\"max-w-4xl mx-auto px-4 py-4 flex items-center justify-between\"><a href=\"/\" class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 grid place-items-center shadow-lg\"><span class=\"font-bold\">FS</span></div><div><div class=\"text-lg font-semibold leading-none\">FairSplit</div><div class=\"text-xs text-slate-400 -mt-0.5\">Split the bill, fair, simply</div></div></a><nav class=\"flex items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/globals.css\"></head><body class=\"min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased\" un-cloak><div class=\"min-h-screen flex flex-col\" un-cloak x-data><header class=\"bg-transparent backdrop-blur-sm border-b border-white/6\"><div class=\"max-w-4xl mx-auto px-4 py-4 flex items-center justify-between\"><a href=\"/\" class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 grid place-items-center shadow-lg\"><span class=\"font-bold\">FS</span></div><div><div class=\"text-lg font-semibold leading-none\">FairSplit</div><div class=\"text-xs text-slate-400 -mt-0.5\">Split the bill, fair, simply</div></div></a><nav class=\"flex items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
