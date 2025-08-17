@@ -11,7 +11,7 @@ WORKDIR /src
 
 COPY ./web/ ./web/
 
-RUN npm install -g unocss
+RUN npm install -g @unocss/cli
 RUN unocss "web/**/*.templ" -o /src/build/uno.css --minify
 
 FROM gcr.io/distroless/static-debian12

@@ -36,25 +36,25 @@ templ Layout(title string) {
 			<meta property="og:site_name" content="SplitFlow"/>
 			<meta property="og:locale" content="it_IT"/>
 			<title>SplitFlow { title }</title>
-			<script>
-				window.__unocss = {
-					preflight: true
-				}
-			</script>
 			if !isProd(ctx) {
+				<script>
+					window.__unocss = {
+						preflight: true
+					}
+				</script>
 				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 				<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+				<style>
+					body[un-cloak] {
+						background-color: #1e293b;
+					}
+					div[un-cloak] {
+						display: none;
+					}
+				</style>
 			} else {
 				<link rel="stylesheet" href="/static/css/uno.css"/>
 			}
-			<style>
-				body[un-cloak] {
-					background-color: #1e293b;
-				}
-				div[un-cloak] {
-					display: none;
-				}
-			</style>
 			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 			<link rel="stylesheet" href="/static/css/globals.css"/>
