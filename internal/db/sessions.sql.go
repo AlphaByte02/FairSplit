@@ -226,3 +226,21 @@ func (q *Queries) ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]
 	}
 	return items, nil
 }
+
+const renameSession = `-- name: RenameSession :exec
+UPDATE sessions
+SET
+    name = $2
+WHERE
+    id = $1
+`
+
+type RenameSessionParams struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+func (q *Queries) RenameSession(ctx context.Context, arg RenameSessionParams) error {
+	_, err := q.db.Exec(ctx, renameSession, arg.ID, arg.Name)
+	return err
+}

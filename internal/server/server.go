@@ -25,6 +25,7 @@ func (s *Server) RegisterRoutes() {
 
 	s.Post("/sessions/new", RequireAuth, handlers.HandleSession)
 	s.Get("/sessions/:id", RequireAuth, HaveSessionAccess, handlers.Session)
+	s.Post("/sessions/:id/rename", RequireAuth, HaveSessionAccess, handlers.SessionRename)
 	s.Post("/sessions/:id/close", RequireAuth, HaveSessionAccess, handlers.SessionClose)
 	s.Post("/sessions/:id/invite", RequireAuth, HaveSessionAccess, handlers.SessionInvite)
 	s.Delete("/sessions/:id/kick/:partecipant", RequireAuth, HaveSessionAccess, handlers.SessionKick)

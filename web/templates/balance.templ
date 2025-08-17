@@ -40,6 +40,9 @@ templ IntermediateBalance(session db.Session, participants []IntermediateBalance
 			</button>
 		</div>
 	</div>
+	if len(participants) == 0 {
+		<p class="text-gray-400">Nessun debito da regolare 🎉</p>
+	}
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 		for _, p := range participants {
 			<div class="bg-gray-800/60 border border-gray-700 rounded-2xl shadow-md p-5 flex flex-col">

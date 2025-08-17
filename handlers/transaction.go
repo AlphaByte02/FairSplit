@@ -15,13 +15,7 @@ func DeleteTransaction(c fiber.Ctx) error {
 
 	err := Q.DeleteTransaction(c, toDeleteID)
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not remove"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusBadRequest)
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore Server", "Errore in eliminazione")
 	}
 
 	// session := fiber.Locals[db.Session](c, "session")
@@ -43,14 +37,11 @@ func HandleTransaction(c fiber.Ctx) error {
 	}
 	err := c.Bind().Form(&transactionParams)
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : ""}}`,
-			)
-		}
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Alcuni campi sono formattati male")
+	}
 
-		return c.SendStatus(fiber.StatusBadRequest)
+	if len(transactionParams.PaidFor) == 0 {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nessun partecipante aggiunto")
 	}
 
 	newTransactionID, _ := uuid.NewV7()
@@ -62,20 +53,13 @@ func HandleTransaction(c fiber.Ctx) error {
 		Description: transactionParams.Description,
 	})
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : ""}}`,
-			)
-		}
-
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore Server", "Errore in creazione")
 	}
 
 	for _, partecipantUUID := range transactionParams.PaidFor {
 		pUUID, err := uuid.Parse(partecipantUUID)
 		if err != nil {
-			return err
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'id di un partecipante non è valido")
 		}
 
 		err = Q.AddTransactionParticipant(
@@ -83,11 +67,11 @@ func HandleTransaction(c fiber.Ctx) error {
 			db.AddTransactionParticipantParams{TransactionID: newTransactionID, UserID: pUUID},
 		)
 		if err != nil {
-			return err
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'id di un partecipante non è valido")
 		}
 	}
 
 	transactions, _ := Q.ListTransactionsBySession(c, session.ID)
 
-	return Render(c, views.TransactionList(transactions))
+	return Render(c, views.SessionBody(session, transactions))
 }

@@ -13,6 +13,7 @@ services:
     app:
         build:
             context: .
+        command: ["air"]
         environment:
             DATABASE_URL: postgres://postgres:secret@postgres:5432/fairsplit
             PORT: "8080"
@@ -22,7 +23,6 @@ services:
             - "8080:8080"
         depends_on:
             - postgres
-        command: ["air"]
 
     adminer:
         image: adminer:latest

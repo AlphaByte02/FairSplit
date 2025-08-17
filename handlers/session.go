@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/AlphaByte02/FairSplit/internal/db"
 	views "github.com/AlphaByte02/FairSplit/web/templates"
 	"github.com/gofiber/fiber/v3"
@@ -13,8 +16,8 @@ func HandleSession(c fiber.Ctx) error {
 	user := fiber.Locals[db.User](c, "user")
 
 	name := c.FormValue("name")
-	if name == "" {
-		return fiber.ErrBadRequest
+	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(name) {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nome sessione non valido")
 	}
 
 	newSessionID, _ := uuid.NewV7()
@@ -23,13 +26,7 @@ func HandleSession(c fiber.Ctx) error {
 	session, err := Q.CreateSession(c, db.CreateSessionParams{ID: newSessionID, CreatedByID: user.ID, Name: name})
 	if err != nil {
 		if err, ok := err.(*pgconn.PgError); ok && err.Code == "23505" {
-			if c.Get("HX-Request") == "true" {
-				c.Set(
-					"HX-Trigger",
-					`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Nome duplicato"}}`,
-				)
-			}
-			return c.SendStatus(fiber.StatusBadRequest)
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questa sessione esiste già")
 		}
 
 		return err
@@ -66,37 +63,23 @@ func SessionInvite(c fiber.Ctx) error {
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
-	username := c.FormValue("username")
+	username := strings.ToLower(c.FormValue("username"))
 	if username == "" {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : ""}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusBadRequest)
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'username non può essere vuoto")
 	}
 
-	participant, err := Q.GetUserByUsername(c, c.FormValue("username"))
+	participant, err := Q.GetUserByUsername(c, username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			newUserID, _ := uuid.NewV7()
-			participant, _ = Q.CreateUser(c, db.CreateUserParams{ID: newUserID, Username: username})
-		} else {
-			return err
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questo utente non esiste")
 		}
 
+		return err
 	}
 
 	err = Q.AddSessionParticipant(c, db.AddSessionParticipantParams{SessionID: session.ID, UserID: participant.ID})
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not add"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusBadRequest)
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore Server", "Errore in aggiunta")
 	}
 
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
@@ -111,13 +94,7 @@ func SessionKick(c fiber.Ctx) error {
 	session := fiber.Locals[db.Session](c, "session")
 
 	if session.CreatedByID != user.ID {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non hai i permessi per rimuovere utenti"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusForbidden)
+		return SendError(c, fiber.StatusForbidden, "danger", "Errore", "Non hai i permessi per rimuovere utenti")
 	}
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
@@ -126,24 +103,12 @@ func SessionKick(c fiber.Ctx) error {
 
 	count, _ := Q.CountTransactionByUser(c, toKickID)
 	if count > 0 {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non puoi rimuovere questo utente"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusBadRequest)
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Non puoi rimuovere questo utente")
 	}
 
 	err := Q.DeleteSessionParticipant(c, toKickID)
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Non puoi rimuovere questo utente"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusBadRequest)
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore Server", "Errore in rimozione")
 	}
 
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
@@ -157,27 +122,63 @@ func SessionClose(c fiber.Ctx) error {
 	session := fiber.Locals[db.Session](c, "session")
 
 	if session.CreatedByID != user.ID {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : "Can not close"}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusForbidden)
+		return SendError(
+			c,
+			fiber.StatusForbidden,
+			"danger",
+			"Errore",
+			"Non hai i permessi per chiudere questa sessione",
+		)
 	}
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 	err := Q.CloseSession(c, session.ID)
 	if err != nil {
-		if c.Get("HX-Request") == "true" {
-			c.Set(
-				"HX-Trigger",
-				`{"showToast": {"level" : "danger", "title" : "Errore", "message" : ""}}`,
-			)
-		}
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return SendError(
+			c,
+			fiber.StatusInternalServerError,
+			"danger",
+			"Errore Server",
+			"Impossibile chiudere la sessione",
+		)
 	}
 	session.IsClosed = true
+
+	participants, _ := Q.ListSessionParticipants(c, session.ID)
+	return Render(c, views.SessionHeader(session, participants))
+}
+
+func SessionRename(c fiber.Ctx) error {
+	user := fiber.Locals[db.User](c, "user")
+	session := fiber.Locals[db.Session](c, "session")
+
+	if session.CreatedByID != user.ID {
+		return SendError(
+			c,
+			fiber.StatusForbidden,
+			"danger",
+			"Errore",
+			"Non hai i permessi per rinominare questa sessione",
+		)
+	}
+
+	newName := c.FormValue("name")
+	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(newName) {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nome sessione non valido")
+	}
+
+	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+	err := Q.RenameSession(c, db.RenameSessionParams{ID: session.ID, Name: newName})
+	if err != nil {
+		return SendError(
+			c,
+			fiber.StatusInternalServerError,
+			"danger",
+			"Errore Server",
+			"Impossibile chiudere la sessione",
+		)
+	}
+	session.Name = newName
 
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
 	return Render(c, views.SessionHeader(session, participants))

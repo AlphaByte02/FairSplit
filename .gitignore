@@ -1,3 +1,4 @@
+### go ###
 *.exe~
 *.dll
 *.so
@@ -17,6 +18,9 @@ go.work
 
 # tmp dir
 tmp/
+
+# compress files
+*.fiber.br
 
 ### env ###
 

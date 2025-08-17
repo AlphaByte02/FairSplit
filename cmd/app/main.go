@@ -13,6 +13,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/favicon"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/session"
@@ -21,6 +22,9 @@ import (
 )
 
 func main() {
+	appEnv := os.Getenv("ENV")
+	isProd := appEnv == "production"
+
 	DB_URI := os.Getenv("DATABASE_URL")
 	if DB_URI == "" {
 		panic(errors.New("'DATABASE_URL' may not be empty"))
@@ -55,19 +59,25 @@ func main() {
 		URL:  "/favicon.png",
 	}))
 
-	app.Get("/static/*", static.New("./web/assets"))
+	app.Get("/static/*", static.New("./web/assets", static.Config{Compress: true, CacheDuration: 10 * time.Second}))
 
-	appEnv := os.Getenv("ENV")
-	isProd := appEnv == "production"
+	if isProd {
+		app.Use(compress.New())
+	}
+
+	app.Use(func(c fiber.Ctx) error {
+		c.Locals("isProd", isProd)
+		return c.Next()
+	})
 
 	sessionMiddleware, store := session.NewWithStore(session.Config{
 		CookieSecure:    isProd,           // HTTPS only
-		CookieHTTPOnly:  true,             // Prevent XSS
-		CookieSameSite:  "Lax",            // CSRF protection
+		CookieHTTPOnly:  true,             // HTTP Only
+		CookieSameSite:  "Lax",            // Same Site
 		IdleTimeout:     30 * time.Minute, // Session timeout
 		AbsoluteTimeout: 24 * time.Hour,   // Maximum session life
 	})
-	store.RegisterType(db.User{}) // Register custom type
+	store.RegisterType(db.User{})
 	app.Use(sessionMiddleware)
 
 	srv := server.New(app)

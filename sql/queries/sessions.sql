@@ -69,6 +69,14 @@ WHERE
     id = $1;
 
 
+-- name: RenameSession :exec
+UPDATE sessions
+SET
+    name = $2
+WHERE
+    id = $1;
+
+
 -- name: CheckSessionAccess :one
 SELECT
     EXISTS (

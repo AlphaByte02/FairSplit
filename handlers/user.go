@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
@@ -17,15 +18,18 @@ func HandleLogin(c fiber.Ctx) error {
 	username := c.FormValue("username")
 
 	if username != "" {
+		if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(username) {
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Username non valido")
+		}
+
 		Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
 		var user db.User
-
 		user, err := Q.GetUserByUsername(c, strings.ToLower(username))
 		if err != nil {
 			if err == pgx.ErrNoRows {
 				newUserID, _ := uuid.NewV7()
-				user, err = Q.CreateUser(c, db.CreateUserParams{ID: newUserID, Username: username})
+				user, err = Q.CreateUser(c, db.CreateUserParams{ID: newUserID, Username: strings.ToLower(username)})
 				if err != nil {
 					return err
 				}
@@ -48,14 +52,14 @@ func HandleLogin(c fiber.Ctx) error {
 		return c.Redirect().To("/")
 	}
 
-	return c.Status(401).SendString("Invalid credentials")
+	return c.Status(fiber.StatusUnauthorized).SendString("Invalid credentials")
 }
 
 func HandleLogout(c fiber.Ctx) error {
 	sess := session.FromContext(c)
 
 	if err := sess.Reset(); err != nil {
-		return c.Status(500).SendString("Session error")
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore", "Session error")
 	}
 
 	return c.Redirect().To("/login")

@@ -22,6 +22,13 @@ func GetUser(ctx context.Context) db.User {
 	return db.User{}
 }
 
+func isProd(ctx context.Context) bool {
+	if isProd, ok := ctx.Value("isProd").(bool); ok {
+		return isProd
+	}
+	return false
+}
+
 func Layout(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -43,48 +50,76 @@ func Layout(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html class=\"dark\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/favicon.png\"><title>SplitFlow - ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html class=\"dark\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/favicon.png\"><meta property=\"og:title\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("SplitFlow " + title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 24, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 31, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script>\n\t\t\t\twindow.__unocss = {\n\t\t\t\t\tpreflight: true\n\t\t\t\t}\n\t\t\t</script><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script><style>\n\t\t\t\tbody[un-cloak] {\n\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t}\n\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/globals.css\"></head><body class=\"min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased\" un-cloak><div class=\"min-h-screen flex flex-col\" un-cloak x-data><header class=\"bg-transparent backdrop-blur-sm border-b border-white/6\"><div class=\"max-w-4xl mx-auto px-4 py-4 flex items-center justify-between\"><a href=\"/\" class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 grid place-items-center shadow-lg\"><span class=\"font-bold\">FS</span></div><div><div class=\"text-lg font-semibold leading-none\">FairSplit</div><div class=\"text-xs text-slate-400 -mt-0.5\">split the bill, simply</div></div></a><nav class=\"flex items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><meta property=\"og:description\" content=\"Split the bill, fair, simply\"><meta property=\"og:image\" content=\"/favicon.png\"><meta property=\"og:type\" content=\"webapp\"><meta property=\"og:site_name\" content=\"SplitFlow\"><meta property=\"og:locale\" content=\"it_IT\"><title>SplitFlow ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if GetUser(ctx).Username == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a href=\"/login\" class=\"px-3 py-1 rounded-md hover:bg-white/6 transition\">Accedi</a>")
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 38, Col: 27}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</title><script>\n\t\t\t\twindow.__unocss = {\n\t\t\t\t\tpreflight: true\n\t\t\t\t}\n\t\t\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !isProd(ctx) {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css\"><script src=\"https://cdn.jsdelivr.net/npm/@unocss/runtime\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"text-gray-300 mr-4 capitalize\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(GetUser(ctx).Username)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 61, Col: 75}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span><div class=\"h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400\"></div><a href=\"/logout\" class=\"ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition\">Esci</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<link rel=\"stylesheet\" href=\"/static/css/uno.css\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</nav></div></header><main class=\"flex-1 flex items-center justify-center px-4 py-8\"><div class=\"w-full max-w-4xl\" id=\"main-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<style>\n\t\t\t\tbody[un-cloak] {\n\t\t\t\t\tbackground-color: #1e293b;\n\t\t\t\t}\n\t\t\t\tdiv[un-cloak] {\n\t\t\t\t\tdisplay: none;\n\t\t\t\t}\n\t\t\t</style><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><link rel=\"stylesheet\" href=\"/static/css/globals.css\"></head><body class=\"min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 antialiased\" un-cloak><div class=\"min-h-screen flex flex-col\" un-cloak x-data><header class=\"bg-transparent backdrop-blur-sm border-b border-white/6\"><div class=\"max-w-4xl mx-auto px-4 py-4 flex items-center justify-between\"><a href=\"/\" class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 grid place-items-center shadow-lg\"><span class=\"font-bold\">FS</span></div><div><div class=\"text-lg font-semibold leading-none\">FairSplit</div><div class=\"text-xs text-slate-400 -mt-0.5\">Split the bill, fair, simply</div></div></a><nav class=\"flex items-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if GetUser(ctx).Username == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a href=\"/login\" class=\"px-3 py-1 rounded-md hover:bg-white/6 transition\">Accedi</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<span class=\"text-gray-300 mr-4 capitalize\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(GetUser(ctx).Username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 79, Col: 75}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span><div class=\"h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400\"></div><a href=\"/logout\" class=\"ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition\">Esci</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</nav></div></header><main class=\"flex-1 flex items-center justify-center px-4 py-8\"><div class=\"w-full max-w-4xl\" id=\"main-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -92,7 +127,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,20 +135,20 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<footer class=\"text-center text-slate-400 text-sm py-6\">&copy; ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<footer class=\"text-center text-slate-400 text-sm py-6\">&copy; ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 75, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 93, Col: 31}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " FairSplit · Creato con ❤️</footer><script>\n\t\t\t\t\tdocument.addEventListener(\"alpine:init\", () => {\n\t\t\t\t\t\tdocument.body.addEventListener(\"showToast\", (evt) => {\n\t\t\t\t\t\t\tlet options = {\n\t\t\t\t\t\t\t\ttype: evt.detail.level,\n\t\t\t\t\t\t\t\tmessage: evt.detail.title,\n\t\t\t\t\t\t\t\tdescription: evt.detail.message || \"C'è stato un errore\",\n\t\t\t\t\t\t\t\tposition : \"top-center\",\n\t\t\t\t\t\t\t\thtml: \"\",\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tvar res = window.dispatchEvent(new CustomEvent('toast-show', { detail : options}));\n\t\t\t\t\t\t});\n\t\t\t\t\t})\n\t\t\t\t</script></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " FairSplit · Creato con ❤️</footer><script>\n\t\t\t\t\tdocument.addEventListener(\"alpine:init\", () => {\n\t\t\t\t\t\tdocument.body.addEventListener(\"htmx:beforeSwap\", (evt) => {\n\t\t\t\t\t\t\tif (evt.detail.xhr.status === 400) {\n\t\t\t\t\t\t\t\tconst options = {\n\t\t\t\t\t\t\t\t\ttype: \"danger\",\n\t\t\t\t\t\t\t\t\tmessage: \"Error\",\n\t\t\t\t\t\t\t\t\tdescription: \"There was an error\",\n\t\t\t\t\t\t\t\t\tposition : \"top-center\",\n\t\t\t\t\t\t\t\t\thtml: \"\",\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\tconst res = JSON.parse(evt.detail.xhr.response);\n\n\t\t\t\t\t\t\t\t\toptions.type = res.level;\n\t\t\t\t\t\t\t\t\toptions.message = res.title;\n\t\t\t\t\t\t\t\t\toptions.description = res.message || options.description;\n\t\t\t\t\t\t\t\t} catch {}\n\n\t\t\t\t\t\t\t\twindow.dispatchEvent(new CustomEvent('toast-show', { detail : options}));\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t</script></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -137,12 +172,12 @@ func Dashboard(sessions []db.Session) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var6 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var7 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -154,33 +189,33 @@ func Dashboard(sessions []db.Session) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div x-data=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ openNewSessionModal: false, numSessions: %d }", len(sessions)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 99, Col: 93}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"space-y-6 fade-in\"><!-- Card utente --><div class=\"bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg\"><h1 class=\"text-2xl font-semibold\">Ciao <b class=\"capitalize\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(GetUser(ctx).Username)
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ openNewSessionModal: false, numSessions: %d }", len(sessions)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 102, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 126, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</b>👋</h1><p class=\"text-slate-300 mt-1\">Ecco le tue sessioni attive e concluse.</p></div><!-- Lista sessioni --><div class=\"bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg\"><div class=\"flex items-center justify-between mb-4\"><h2 class=\"text-lg font-semibold\">Sessioni</h2><button class=\"px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition\" @click=\"openNewSessionModal = true\">Nuova sessione</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"space-y-6 fade-in\"><!-- Card utente --><div class=\"bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg\"><h1 class=\"text-2xl font-semibold\">Ciao <b class=\"capitalize\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(GetUser(ctx).Username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 129, Col: 89}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</b>👋</h1><p class=\"text-slate-300 mt-1\">Ecco tutte le tue sessioni.</p></div><!-- Lista sessioni --><div class=\"bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg\"><div class=\"flex items-center justify-between mb-4\"><h2 class=\"text-lg font-semibold\">Sessioni</h2><button class=\"px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition\" @click=\"openNewSessionModal = true\">Nuova sessione</button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -188,13 +223,13 @@ func Dashboard(sessions []db.Session) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><!-- Modal --><div x-show=\"openNewSessionModal\" x-transition.opacity class=\"fixed inset-0 bg-black/60 backdrop-blur-sm z-40\" @click=\"openNewSessionModal = false\"></div><div x-show=\"openNewSessionModal\" x-transition class=\"fixed inset-0 flex items-center justify-center z-50 p-4\"><div class=\"bg-white/10 backdrop-blur-md border border-white/10 rounded-xl shadow-xl w-full max-w-md p-6\" @click.stop><h3 class=\"text-xl font-semibold mb-4\">Crea una nuova sessione</h3><form hx-post=\"/sessions/new\" hx-target=\"#sessions-list\" hx-swap=\"afterbegin\" @htmx:after-request=\"openNewSessionModal = false; numSessions++\" class=\"space-y-4\"><div><label class=\"block text-sm text-slate-300 mb-1\">Nome sessione</label> <input type=\"text\" name=\"name\" required class=\"w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white placeholder-slate-400 focus:(outline-none ring-2 ring-emerald-500)\" placeholder=\"Es. Vacanza a Roma\"></div><div class=\"flex justify-end gap-2\"><button type=\"button\" class=\"px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200\" @click=\"openNewSessionModal = false\">Annulla</button> <button type=\"submit\" class=\"px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium\">Crea</button></div></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><!-- Modal --><div x-show=\"openNewSessionModal\" x-transition.opacity class=\"fixed inset-0 bg-black/60 backdrop-blur-sm z-40\" @click=\"openNewSessionModal = false\"></div><div x-show=\"openNewSessionModal\" x-transition class=\"fixed inset-0 flex items-center justify-center z-50 p-4\"><div class=\"bg-white/10 backdrop-blur-md border border-white/10 rounded-xl shadow-xl w-full max-w-md p-6\" @click.stop><h3 class=\"text-xl font-semibold mb-4\">Crea una nuova sessione</h3><form hx-post=\"/sessions/new\" hx-target=\"#sessions-list\" hx-swap=\"afterbegin\" @htmx:after-request=\"openNewSessionModal = false\" @htmx:after-swap=\"numSessions++\" class=\"space-y-4\"><div><label class=\"block text-sm text-slate-300 mb-1\">Nome sessione</label> <input type=\"text\" name=\"name\" required class=\"w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white placeholder-slate-400 focus:(outline-none ring-2 ring-emerald-500)\" placeholder=\"Es. Vacanza a Roma\"></div><div class=\"flex justify-end gap-2\"><button type=\"button\" class=\"px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200\" @click=\"openNewSessionModal = false\">Annulla</button> <button type=\"submit\" class=\"px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium\">Crea</button></div></form></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout("Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout("- Dashboard").Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
