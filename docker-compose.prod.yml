@@ -13,10 +13,6 @@ services:
         build: .
         container_name: fairsplit
         restart: unless-stopped
-        networks:
-            - default
-            - caddy
-            - postgres
         environment:
             ENV: production
             DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/fairsplit?sslmode=disable

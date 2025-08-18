@@ -18,9 +18,10 @@ services:
             DATABASE_URL: postgres://postgres:secret@postgres:5432/fairsplit
             PORT: "8080"
         volumes:
-            - ./:/src
+            - ./:/app
         ports:
             - "8080:8080"
+            - "3000:3000"
         depends_on:
             - postgres
 
