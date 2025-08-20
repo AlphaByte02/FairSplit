@@ -181,8 +181,7 @@ templ Dashboard(sessions []db.Session) {
 						hx-post="/sessions/new"
 						hx-target="#sessions-list"
 						hx-swap="afterbegin"
-						@htmx:after-request="openNewSessionModal = false"
-						@htmx:after-swap="numSessions++"
+						@htmx:after-request="openNewSessionModal = false; if ($event.detail.successful) { numSessions++ }"
 						class="space-y-4"
 					>
 						<div>
@@ -193,6 +192,7 @@ templ Dashboard(sessions []db.Session) {
 								required
 								class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white placeholder-slate-400 focus:(outline-none ring-2 ring-emerald-500)"
 								placeholder="Es. Vacanza"
+								minlength="3"
 							/>
 						</div>
 						<div class="flex justify-end gap-2">

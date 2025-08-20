@@ -202,7 +202,12 @@ type Text struct {
 var _ encoding.TextUnmarshaler = (*Text)(nil)
 
 func (t *Text) UnmarshalText(text []byte) error {
-	return t.Scan(string(text))
+	nt := string(text)
+
+	if nt == "" {
+		return t.Scan(nil)
+	}
+	return t.Scan(nt)
 }
 
 func NewText(v string) Text {

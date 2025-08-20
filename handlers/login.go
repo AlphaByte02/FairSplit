@@ -74,6 +74,8 @@ func HandleGoogleLoginCallback(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Email non disponibile")
 	}
 
+	redirectUrl := "/"
+
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
 	var user db.User
@@ -86,10 +88,17 @@ func HandleGoogleLoginCallback(c fiber.Ctx) error {
 				db.CreateUserParams{ID: newUserID, Email: userInfo.Email, Picture: types.NewText(userInfo.Picture)},
 			)
 			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).SendString("Errore creazione user: " + err.Error())
+				return c.Status(fiber.StatusInternalServerError).SendString("Errore creazione user")
 			}
+
+			redirectUrl = "/user"
 		} else {
-			return c.Status(fiber.StatusInternalServerError).SendString("Errore creazione user: " + err.Error())
+			return c.Status(fiber.StatusInternalServerError).SendString("Errore creazione user")
+		}
+	} else {
+		if user.Picture.String != userInfo.Picture {
+			Q.UpdateUserPicture(c, db.UpdateUserPictureParams{ID: user.ID, Picture: types.NewText(userInfo.Picture)})
+			user.Picture = types.NewText(userInfo.Picture)
 		}
 	}
 
@@ -98,11 +107,6 @@ func HandleGoogleLoginCallback(c fiber.Ctx) error {
 	}
 
 	sess.Set("user", user)
-
-	redirectUrl := "/"
-	if user.Username.String == "" {
-		redirectUrl = "/user"
-	}
 
 	if c.Get("HX-Request") == "true" {
 		c.Set("HX-Redirect", redirectUrl)

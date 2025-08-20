@@ -43,7 +43,15 @@ func User() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"{ editing: false }\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			templ_7745c5c3_Err = UserInfo(GetUser(ctx)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -78,46 +86,46 @@ func UserInfo(user db.User) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"user-info\" class=\"max-w-xl mx-auto space-y-6\"><h1 class=\"text-2xl font-bold text-white mb-6\">User Info</h1><form hx-patch=\"/user\" hx-target=\"#user-info\" hx-swap=\"outerHTML\" class=\"space-y-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10\"><!-- Username --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">Username</label> <input required type=\"text\" name=\"username\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div id=\"user-info\" class=\"max-w-xl mx-auto space-y-6\"><h1 class=\"text-2xl font-bold text-white mb-6\">User Info</h1><form hx-patch=\"/user\" hx-target=\"#user-info\" hx-swap=\"outerHTML\" @htmx:after-request.window=\"editing = false\" class=\"space-y-6 bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg p-6 border border-white/10\"><!-- Username --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">Username</label> <input required type=\"text\" name=\"username\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username.String)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 27, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 30, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500\"></div><!-- Paypal Username --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">PayPal Username</label> <input type=\"text\" name=\"paypal_username\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" minlength=\"3\" :disabled=\"!editing\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5\"></div><!-- Paypal Username --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">PayPal Username</label> <input type=\"text\" name=\"paypal_username\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.PaypalUsername.String)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 37, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 42, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500\"></div><!-- IBAN --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">IVAN</label> <input type=\"text\" name=\"iban\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" :disabled=\"!editing\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5\"></div><!-- IBAN --><div><label class=\"block text-sm font-medium text-gray-300 mb-1\">IVAN</label> <input type=\"text\" name=\"iban\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(user.Iban))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 47, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/user.templ`, Line: 53, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500\"></div><!-- Save button --><div class=\"flex justify-end\"><button type=\"submit\" class=\"px-4 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-600 text-white font-semibold shadow-md transition\">Salva</button></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" :disabled=\"!editing\" class=\"w-full rounded-xl bg-white/5 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5\"></div><!-- Action buttons --><div class=\"flex justify-end space-x-3\"><button type=\"button\" x-show=\"!editing\" @click=\"editing = true\" class=\"px-4 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-600 text-white font-semibold shadow-md transition\">Edit</button><div x-show=\"editing\" class=\"flex space-x-3\"><button type=\"button\" @click=\"editing = false\" class=\"px-4 py-2 rounded-xl bg-red-600/90 hover:bg-red-600 text-white font-semibold shadow-md transition\">Cancel</button> <button type=\"reset\" class=\"px-4 py-2 rounded-xl bg-orange-600/90 hover:bg-orange-600 text-white font-semibold shadow-md transition\">Reset</button> <button type=\"submit\" class=\"px-4 py-2 rounded-xl bg-green-600/90 hover:bg-green-600 text-white font-semibold shadow-md transition\">Save</button></div></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

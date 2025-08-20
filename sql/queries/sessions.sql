@@ -8,7 +8,9 @@ FROM
     sessions s
     JOIN users u ON u.id = s.created_by_id
 WHERE
-    s.id = $1;
+    s.id = $1
+ORDER BY
+    s.created_at DESC;
 
 
 -- name: ListSessionsForUser :many
@@ -18,7 +20,9 @@ FROM
     sessions s
     JOIN session_participants sp ON s.id = sp.session_id
 WHERE
-    sp.user_id = $1;
+    sp.user_id = $1
+ORDER BY
+    s.created_at DESC;
 
 
 -- name: CreateSession :one

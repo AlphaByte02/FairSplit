@@ -107,13 +107,37 @@ templ FinalBalance(session db.Session, transfers []BalanceTransferItem) {
 			<p class="text-gray-400">Nessun debito da regolare 🎉</p>
 		} else {
 			for _, tr := range transfers {
-				<div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between shadow-md">
-					<div>
-						<span class="text-gray-200 font-medium">{ tr.From.Username.String }</span>
-						<span class="text-gray-400">deve a </span>
-						<span class="text-gray-200 font-medium">{ tr.To.Username.String }</span>
+				<div x-data="{ expanded: false }" @click="expanded = !expanded" class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md">
+					<div class="flex items-center justify-between">
+						<div>
+							<span class="text-gray-200 font-medium">{ tr.From.Username.String }</span>
+							<span class="text-gray-400">deve a </span>
+							<span class="text-gray-200 font-medium">{ tr.To.Username.String }</span>
+						</div>
+						<span class="text-emerald-400 font-bold text-lg tracking-wide">€{ fmt.Sprintf("%.02f", tr.Amount) }</span>
 					</div>
-					<span class="text-emerald-400 font-bold text-lg tracking-wide">€{ fmt.Sprintf("%.02f", tr.Amount) }</span>
+					<div x-show="expanded" x-transition>
+						<hr class="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700"/>
+						if tr.To.PaypalUsername.String != "" {
+							<div class="flex items-center space-x-2">
+								<span class="font-medium text-gray-400">PayPal:</span>
+								<a
+									href={ fmt.Sprintf("https://paypal.me/%s", tr.To.PaypalUsername.String) }
+									target="_blank"
+									class="text-blue-400 hover:underline"
+								>{ tr.To.PaypalUsername.String }</a>
+							</div>
+						}
+						if tr.To.Iban != "" {
+							<div class="flex items-center space-x-2">
+								<span class="font-medium text-gray-400">IBAN:</span>
+								<span class="text-white">{ tr.To.Iban }</span>
+							</div>
+						}
+						if tr.To.PaypalUsername.String == "" && tr.To.Iban == "" {
+							<div class="flex items-center space-x-2"><span class="italic font-medium text-gray-400">No info</span></div>
+						}
+					</div>
 				</div>
 			}
 		}

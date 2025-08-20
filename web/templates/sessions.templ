@@ -16,18 +16,41 @@ templ Sessions(sessions []db.Session) {
 }
 
 templ SessionItem(session db.Session) {
-	<div class="py-4 flex items-center justify-between">
-		<div>
-			<div class="font-medium">
-				{ session.Name }
-				if session.IsClosed {
-					🔒
-				}
+	<a
+		href={ "/sessions/" + session.ID.String() }
+		class="mb-1 block rounded-2xl p-5 bg-black/40 backdrop-blur-sm border border-white/5
+          hover:bg-black/60 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10
+          transition-all duration-200 group"
+	>
+		<div class="flex items-center justify-between">
+			<div>
+				<h2 class="text-lg font-semibold text-white group-hover:text-blue-400 transition">
+					{ session.Name }
+					if session.IsClosed {
+						🔒
+					}
+				</h2>
+				<p class="text-sm text-gray-400">
+					Aperta il { session.CreatedAt.Time.Format("02 Jan 2006") }
+				</p>
 			</div>
-			<div class="text-xs text-slate-400">Aperta il { session.CreatedAt.Time.Format("02/01/2006") }</div>
+			<!-- Icona freccia -->
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="w-6 h-6 text-gray-400 group-hover:text-blue-400 transition-transform group-hover:translate-x-1"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 5l7 7-7 7"
+				></path>
+			</svg>
 		</div>
-		<a href={ "/sessions/" + session.ID.String() } class="px-3 py-1 rounded-md bg-white/6 hover:bg-white/8 text-sm">Visualizza</a>
-	</div>
+	</a>
 }
 
 templ PartecipantsCount(count int) {
@@ -107,18 +130,15 @@ templ SessionHeader(session db.Session, participants []db.User) {
 			<!-- Visualizzazione normale -->
 			<h1 x-show="!editing" class="text-2xl font-bold flex items-center space-x-2">
 				<span x-text="name"></span>
-				if session.IsClosed {
-					🔒
-				}
 				if GetUser(ctx).ID == session.CreatedByID {
 					<button
 						@click="editing = true; $nextTick(() => $refs.input.focus())"
-						class="ml-2 text-gray-400 hover:text-emerald-400 transition bg-transparent"
+						class="text-gray-400 hover:text-emerald-400 transition bg-transparent"
 						title="Rinomina sessione"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							class="w-5 h-5"
+							class="w-6 h-6"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -131,6 +151,9 @@ templ SessionHeader(session db.Session, participants []db.User) {
 							></path>
 						</svg>
 					</button>
+				}
+				if session.IsClosed {
+					<span x-show="!editing">🔒</span>
 				}
 			</h1>
 			<!-- Input editabile -->
@@ -147,6 +170,7 @@ templ SessionHeader(session db.Session, participants []db.User) {
 						x-model="name"
 						name="name"
 						type="text"
+						minlength="3"
 						class="bg-gray-900/70 border border-gray-700 rounded-lg px-2 py-1 focus:ring focus:ring-emerald-500 focus:outline-none"
 					/>
 					<button

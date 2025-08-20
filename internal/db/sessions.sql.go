@@ -128,6 +128,8 @@ FROM
     JOIN users u ON u.id = s.created_by_id
 WHERE
     s.id = $1
+ORDER BY
+    s.created_at DESC
 `
 
 type GetSessionRow struct {
@@ -206,6 +208,8 @@ FROM
     JOIN session_participants sp ON s.id = sp.session_id
 WHERE
     sp.user_id = $1
+ORDER BY
+    s.created_at DESC
 `
 
 func (q *Queries) ListSessionsForUser(ctx context.Context, userID uuid.UUID) ([]Session, error) {

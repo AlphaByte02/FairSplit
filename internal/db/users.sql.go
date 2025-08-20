@@ -116,11 +116,11 @@ SELECT
 FROM
     users
 WHERE
-    username = $1
+    LOWER(username) = LOWER($1)
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username types.Text) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByUsername, username)
+func (q *Queries) GetUserByUsername(ctx context.Context, lower string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, lower)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -159,5 +159,23 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.PaypalUsername,
 		arg.Iban,
 	)
+	return err
+}
+
+const updateUserPicture = `-- name: UpdateUserPicture :exec
+UPDATE users
+SET
+    picture = $2
+WHERE
+    id = $1
+`
+
+type UpdateUserPictureParams struct {
+	ID      uuid.UUID  `json:"id"`
+	Picture types.Text `json:"picture"`
+}
+
+func (q *Queries) UpdateUserPicture(ctx context.Context, arg UpdateUserPictureParams) error {
+	_, err := q.db.Exec(ctx, updateUserPicture, arg.ID, arg.Picture)
 	return err
 }

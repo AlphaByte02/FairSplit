@@ -22,7 +22,7 @@ SELECT
 FROM
     users
 WHERE
-    username = $1;
+    LOWER(username) = LOWER($1);
 
 
 -- name: UpdateUser :exec
@@ -31,6 +31,14 @@ SET
     username = $2,
     paypal_username = $3,
     iban = $4
+WHERE
+    id = $1;
+
+
+-- name: UpdateUserPicture :exec
+UPDATE users
+SET
+    picture = $2
 WHERE
     id = $1;
 
