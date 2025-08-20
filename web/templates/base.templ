@@ -42,14 +42,15 @@ templ Layout(title string) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width,initial-scale=1"/>
 			<link rel="icon" type="image/x-icon" href="/favicon.png"/>
-			<meta property="og:title" content={ "SplitFlow " + title }/>
+			<meta property="og:title" content={ "FairSplit " + title }/>
 			<meta property="og:description" content="Split the bill, fair, simply"/>
+			<meta name="description" content="Split the bill, fair, simply"/>
 			<meta property="og:image" content="/favicon.png"/>
 			/* <meta property="og:url" content=""/> */
 			<meta property="og:type" content="webapp"/>
-			<meta property="og:site_name" content="SplitFlow"/>
+			<meta property="og:site_name" content="FairSplit"/>
 			<meta property="og:locale" content="it_IT"/>
-			<title>SplitFlow { title }</title>
+			<title>FairSplit { title }</title>
 			if !isProd(ctx) {
 				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind-compat.min.css"/>
 				<script>

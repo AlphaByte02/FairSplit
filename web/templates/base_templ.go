@@ -69,7 +69,7 @@ func Layout(title string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("SplitFlow " + title)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("FairSplit " + title)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 45, Col: 59}
 		}
@@ -77,14 +77,14 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><meta property=\"og:description\" content=\"Split the bill, fair, simply\"><meta property=\"og:image\" content=\"/favicon.png\"><meta property=\"og:type\" content=\"webapp\"><meta property=\"og:site_name\" content=\"SplitFlow\"><meta property=\"og:locale\" content=\"it_IT\"><title>SplitFlow ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><meta property=\"og:description\" content=\"Split the bill, fair, simply\"><meta name=\"description\" content=\"Split the bill, fair, simply\"><meta property=\"og:image\" content=\"/favicon.png\"><meta property=\"og:type\" content=\"webapp\"><meta property=\"og:site_name\" content=\"FairSplit\"><meta property=\"og:locale\" content=\"it_IT\"><title>FairSplit ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 52, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 53, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -136,7 +136,7 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 99, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 100, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -188,7 +188,7 @@ func UserNav(username string) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 135, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 136, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -247,7 +247,7 @@ func Dashboard(sessions []db.Session) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ openNewSessionModal: false, numSessions: %d }", len(sessions)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 144, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 145, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -260,7 +260,7 @@ func Dashboard(sessions []db.Session) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(GetUsername(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 147, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/base.templ`, Line: 148, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
