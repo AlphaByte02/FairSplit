@@ -8,29 +8,41 @@ package db
 import (
 	"context"
 
+	"github.com/AlphaByte02/FairSplit/internal/types"
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO
-    users (id, username)
+    users (id, email, username, picture)
 VALUES
-    ($1, $2)
+    ($1, $2, $3, $4)
 RETURNING
-    id, username, created_at, updated_at
+    id, email, username, picture, paypal_username, iban, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
+	ID       uuid.UUID  `json:"id"`
+	Email    string     `json:"email"`
+	Username types.Text `json:"username"`
+	Picture  types.Text `json:"picture"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Username)
+	row := q.db.QueryRow(ctx, createUser,
+		arg.ID,
+		arg.Email,
+		arg.Username,
+		arg.Picture,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
 		&i.Username,
+		&i.Picture,
+		&i.PaypalUsername,
+		&i.Iban,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -50,7 +62,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-    id, username, created_at, updated_at
+    id, email, username, picture, paypal_username, iban, created_at, updated_at
 FROM
     users
 WHERE
@@ -62,7 +74,36 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
 		&i.Username,
+		&i.Picture,
+		&i.PaypalUsername,
+		&i.Iban,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT
+    id, email, username, picture, paypal_username, iban, created_at, updated_at
+FROM
+    users
+WHERE
+    email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.Picture,
+		&i.PaypalUsername,
+		&i.Iban,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -71,21 +112,52 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT
-    id, username, created_at, updated_at
+    id, email, username, picture, paypal_username, iban, created_at, updated_at
 FROM
     users
 WHERE
     username = $1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+func (q *Queries) GetUserByUsername(ctx context.Context, username types.Text) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
 		&i.Username,
+		&i.Picture,
+		&i.PaypalUsername,
+		&i.Iban,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET
+    username = $2,
+    paypal_username = $3,
+    iban = $4
+WHERE
+    id = $1
+`
+
+type UpdateUserParams struct {
+	ID             uuid.UUID             `json:"id"`
+	Username       types.Text            `json:"username"`
+	PaypalUsername types.Text            `json:"paypal_username"`
+	Iban           types.EncryptedString `json:"iban"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
+		arg.Username,
+		arg.PaypalUsername,
+		arg.Iban,
+	)
+	return err
 }

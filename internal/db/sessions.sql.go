@@ -121,7 +121,7 @@ const getSession = `-- name: GetSession :one
 SELECT
     /* sql-formatter-disable */
     s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at,
-    u.id, u.username, u.created_at, u.updated_at
+    u.id, u.email, u.username, u.picture, u.paypal_username, u.iban, u.created_at, u.updated_at
     /* sql-formatter-enable */
 FROM
     sessions s
@@ -146,7 +146,11 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (GetSessionRow, 
 		&i.Session.CreatedAt,
 		&i.Session.UpdatedAt,
 		&i.User.ID,
+		&i.User.Email,
 		&i.User.Username,
+		&i.User.Picture,
+		&i.User.PaypalUsername,
+		&i.User.Iban,
 		&i.User.CreatedAt,
 		&i.User.UpdatedAt,
 	)
@@ -155,7 +159,7 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (GetSessionRow, 
 
 const listSessionParticipants = `-- name: ListSessionParticipants :many
 SELECT
-    u.id, u.username, u.created_at, u.updated_at
+    u.id, u.email, u.username, u.picture, u.paypal_username, u.iban, u.created_at, u.updated_at
 FROM
     session_participants sp
     JOIN users u ON u.id = sp.user_id
@@ -176,7 +180,11 @@ func (q *Queries) ListSessionParticipants(ctx context.Context, sessionID uuid.UU
 		var i User
 		if err := rows.Scan(
 			&i.ID,
+			&i.Email,
 			&i.Username,
+			&i.Picture,
+			&i.PaypalUsername,
+			&i.Iban,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

@@ -151,7 +151,7 @@ const listTransactionsBySession = `-- name: ListTransactionsBySession :many
 SELECT
     t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
     /* sql-formatter-disable */
-    payer.id, payer.username, payer.created_at, payer.updated_at,
+    payer.id, payer.email, payer.username, payer.picture, payer.paypal_username, payer.iban, payer.created_at, payer.updated_at,
     /* sql-formatter-enable */
     ARRAY_AGG(DISTINCT u.username)::TEXT[] AS participants
 FROM
@@ -207,7 +207,11 @@ func (q *Queries) ListTransactionsBySession(ctx context.Context, sessionID uuid.
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.User.ID,
+			&i.User.Email,
 			&i.User.Username,
+			&i.User.Picture,
+			&i.User.PaypalUsername,
+			&i.User.Iban,
 			&i.User.CreatedAt,
 			&i.User.UpdatedAt,
 			&i.Participants,

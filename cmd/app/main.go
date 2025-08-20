@@ -59,7 +59,11 @@ func main() {
 		URL:  "/favicon.png",
 	}))
 
-	app.Get("/static/*", static.New("./web/assets", static.Config{Compress: true, CacheDuration: 10 * time.Second}))
+	cacheDuration := 1 * time.Hour
+	if !isProd {
+		cacheDuration = 10 * time.Second
+	}
+	app.Get("/static/*", static.New("./web/assets", static.Config{Compress: true, CacheDuration: cacheDuration}))
 
 	if isProd {
 		app.Use(compress.New())

@@ -1,7 +1,11 @@
 -- Postgres schema for FairSplit
 CREATE TABLE users (
   id UUID PRIMARY KEY,
-  username TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  username TEXT,
+  picture TEXT,
+  paypal_username TEXT,
+  iban TEXT,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
@@ -24,6 +28,7 @@ CREATE INDEX idx_session_created_by_id ON sessions (created_by_id);
 CREATE TABLE session_participants (
   session_id UUID NOT NULL REFERENCES sessions (id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   PRIMARY KEY (session_id, user_id)
 );
 
@@ -39,7 +44,7 @@ CREATE TABLE transactions (
   session_id UUID NOT NULL REFERENCES sessions (id) ON DELETE CASCADE,
   payer_id UUID NOT NULL REFERENCES users (id),
   amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
-  description text,
+  description TEXT,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );

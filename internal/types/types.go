@@ -10,18 +10,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-/* func Text(v string) pgtype.Text {
-	var t pgtype.Text
-	_ = t.Scan(v)
-	return t
-}
-
-func Numeric(v string) pgtype.Numeric {
-	var n pgtype.Numeric
-	_ = n.Scan(v) // v può essere int, float64, string o nil
-	return n
-} */
-
 // Wrapper per pgtype.Numeric
 type Numeric struct {
 	pgtype.Numeric
@@ -200,19 +188,25 @@ func (n Numeric) Div(other Numeric, precision int32) (Numeric, error) {
 	}, nil
 }
 
+func NewNumeric(v string) Numeric {
+	var n Numeric
+	_ = n.Scan(v)
+	return n
+}
+
 // Wrapper per pgtype.Text
 type Text struct {
 	pgtype.Text
 }
 
 var _ encoding.TextUnmarshaler = (*Text)(nil)
-var _ fmt.Stringer = (*Text)(nil)
 
 func (t *Text) UnmarshalText(text []byte) error {
 	return t.Scan(string(text))
 }
 
-func (t *Text) String() string {
-	v, _ := t.TextValue()
-	return v.String
+func NewText(v string) Text {
+	var t Text
+	_ = t.Scan(v)
+	return t
 }

@@ -14,12 +14,8 @@ func RequireAuth(c fiber.Ctx) error {
 		return c.Redirect().To("/login")
 	}
 
-	if sess.Get("authenticated") != true {
-		return c.Redirect().To("/login")
-	}
-
 	user, ok := sess.Get("user").(db.User)
-	if !ok {
+	if !ok || user.Email == "" {
 		sess.Reset()
 		return c.Redirect().To("/login")
 	}

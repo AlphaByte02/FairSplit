@@ -4,7 +4,8 @@ TODO:
 -   [ ] Better error handling
 -   [ ] CRFS token
 -   [ ] Better configs management
--   [ ] OAuth2 login
+-   [x] OAuth2 login
 -   [ ] Edit/Delete user
 -   [ ] Edit/Delete session
 -   [ ] Edit/Delete transaction
+-   [ ] Internalization

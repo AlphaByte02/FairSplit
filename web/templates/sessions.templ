@@ -62,7 +62,7 @@ templ PartecipantsModalList(session db.Session, participants []db.User) {
 	<div id="participants-modal-list" hx-swap-oob="true" class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
 		for i, p := range participants {
 			<div id={ fmt.Sprintf("participant-%d", i) } class="flex items-center justify-between bg-gray-800/60 border border-gray-700 rounded-lg px-3 py-2">
-				<span class="text-gray-200 capitalize">{ p.Username }</span>
+				<span class="text-gray-200">{ p.Username.String }</span>
 				if GetUser(ctx).ID == session.CreatedByID && p.ID != session.CreatedByID {
 					<button
 						hx-delete={ "/sessions/" + session.ID.String() + "/kick/" + p.ID.String() }
@@ -287,9 +287,9 @@ templ NewTransactionModalContent(session db.Session, participants []db.User, oob
 								if u.ID == GetUser(ctx).ID {
 									selected
 								}
-								class="bg-gray-800 text-gray-100 capitalize"
+								class="bg-gray-800 text-gray-100"
 							>
-								{ u.Username }
+								{ u.Username.String }
 							</option>
 						}
 					</select>
@@ -345,7 +345,7 @@ templ NewTransactionModalContent(session db.Session, participants []db.User, oob
 					for _, p := range participants {
 						<label class="flex items-center gap-2 bg-gray-800/60 backdrop-blur-md p-2 rounded-lg border border-gray-700 text-gray-200 cursor-pointer hover:bg-gray-800/80 transition">
 							<input type="checkbox" name="paid_for" value={ p.ID.String() } class="accent-emerald-500"/>
-							<span class="capitalize">{ p.Username }</span>
+							<span>{ p.Username.String }</span>
 						</label>
 					}
 				</div>
@@ -403,8 +403,8 @@ templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
 templ TransactionItem(transaction db.ListTransactionsBySessionRow) {
 	<div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between hover:bg-gray-800/80 transition">
 		<div class="flex flex-col space-y-1">
-			<span class="text-gray-200 font-medium">{ transaction.Description.String() }</span>
-			<span class="text-gray-300 text-sm"><span class="font-medium capitalize">{ transaction.User.Username }</span> ha pagato</span>
+			<span class="text-gray-200 font-medium">{ transaction.Description.String }</span>
+			<span class="text-gray-300 text-sm"><span class="font-medium">{ transaction.User.Username.String }</span> ha pagato</span>
 			<div x-data="{ open: false }" class="relative inline-block">
 				per
 				<span

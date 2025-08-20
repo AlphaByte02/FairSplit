@@ -16,8 +16,8 @@ const getIntermediateBalances = `-- name: GetIntermediateBalances :many
 SELECT
     /* sql-formatter-disable */
     t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
-    payer.id, payer.username, payer.created_at, payer.updated_at,
-    dep.id, dep.username, dep.created_at, dep.updated_at,
+    payer.id, payer.email, payer.username, payer.picture, payer.paypal_username, payer.iban, payer.created_at, payer.updated_at,
+    dep.id, dep.email, dep.username, dep.picture, dep.paypal_username, dep.iban, dep.created_at, dep.updated_at,
     /* sql-formatter-enable */
     (
         t.amount / COUNT(tp.*) OVER (
@@ -61,11 +61,19 @@ func (q *Queries) GetIntermediateBalances(ctx context.Context, sessionID uuid.UU
 			&i.Transaction.CreatedAt,
 			&i.Transaction.UpdatedAt,
 			&i.User.ID,
+			&i.User.Email,
 			&i.User.Username,
+			&i.User.Picture,
+			&i.User.PaypalUsername,
+			&i.User.Iban,
 			&i.User.CreatedAt,
 			&i.User.UpdatedAt,
 			&i.User_2.ID,
+			&i.User_2.Email,
 			&i.User_2.Username,
+			&i.User_2.Picture,
+			&i.User_2.PaypalUsername,
+			&i.User_2.Iban,
 			&i.User_2.CreatedAt,
 			&i.User_2.UpdatedAt,
 			&i.AmountPerUser,
@@ -133,7 +141,7 @@ WITH
     )
 SELECT
     /* sql-formatter-disable */
-    u.id, u.username, u.created_at, u.updated_at,
+    u.id, u.email, u.username, u.picture, u.paypal_username, u.iban, u.created_at, u.updated_at,
     /* sql-formatter-enable */
     b.balance
 FROM
@@ -157,7 +165,11 @@ func (q *Queries) GetSessionBalances(ctx context.Context, sessionID uuid.UUID) (
 		var i GetSessionBalancesRow
 		if err := rows.Scan(
 			&i.User.ID,
+			&i.User.Email,
 			&i.User.Username,
+			&i.User.Picture,
+			&i.User.PaypalUsername,
+			&i.User.Iban,
 			&i.User.CreatedAt,
 			&i.User.UpdatedAt,
 			&i.Balance,

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
+	"github.com/AlphaByte02/FairSplit/internal/types"
 	views "github.com/AlphaByte02/FairSplit/web/templates"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
@@ -68,7 +69,7 @@ func SessionInvite(c fiber.Ctx) error {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'username non può essere vuoto")
 	}
 
-	participant, err := Q.GetUserByUsername(c, username)
+	participant, err := Q.GetUserByUsername(c, types.NewText(username))
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questo utente non esiste")

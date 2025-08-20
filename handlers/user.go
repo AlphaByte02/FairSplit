@@ -2,69 +2,63 @@ package handlers
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
+	"github.com/AlphaByte02/FairSplit/internal/types"
 	views "github.com/AlphaByte02/FairSplit/web/templates"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/session"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
-func HandleLogin(c fiber.Ctx) error {
-	sess := session.FromContext(c)
-
-	username := c.FormValue("username")
-
-	if username != "" {
-		if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(username) {
-			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Username non valido")
-		}
-
-		Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
-
-		var user db.User
-		user, err := Q.GetUserByUsername(c, strings.ToLower(username))
-		if err != nil {
-			if err == pgx.ErrNoRows {
-				newUserID, _ := uuid.NewV7()
-				user, err = Q.CreateUser(c, db.CreateUserParams{ID: newUserID, Username: strings.ToLower(username)})
-				if err != nil {
-					return err
-				}
-			} else {
-				return err
-			}
-		}
-
-		if err := sess.Session.Regenerate(); err != nil {
-			return err
-		}
-
-		sess.Set("user", user)
-		sess.Set("authenticated", true)
-
-		if c.Get("HX-Request") == "true" {
-			c.Set("HX-Redirect", "/")
-			return c.SendStatus(fiber.StatusNoContent)
-		}
-		return c.Redirect().To("/")
-	}
-
-	return c.Status(fiber.StatusUnauthorized).SendString("Invalid credentials")
+func User(c fiber.Ctx) error {
+	return Render(c, views.User())
 }
 
-func HandleLogout(c fiber.Ctx) error {
-	sess := session.FromContext(c)
+func HandleUpdateUser(c fiber.Ctx) error {
+	user := fiber.Locals[db.User](c, "user")
 
-	if err := sess.Reset(); err != nil {
-		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore", "Session error")
+	var userInfo struct {
+		Username       types.Text            `json:"username" form:"username"`
+		PaypalUsername types.Text            `json:"paypal_username" form:"paypal_username"`
+		Iban           types.EncryptedString `json:"iban" form:"iban"`
+	}
+	err := c.Bind().Form(&userInfo)
+	if err != nil {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Alcuni campi sono formattati male")
 	}
 
-	return c.Redirect().To("/login")
-}
+	newUsername := userInfo.Username.String
+	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(newUsername) {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Username non valido")
+	}
 
-func Login(c fiber.Ctx) error {
-	return Render(c, views.Login())
+	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+	err = Q.UpdateUser(
+		c,
+		db.UpdateUserParams{
+			ID:             user.ID,
+			Username:       types.NewText(newUsername),
+			PaypalUsername: userInfo.PaypalUsername,
+			Iban:           userInfo.Iban,
+		},
+	)
+	if err != nil {
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore", "Impossibile salvare l'utente")
+	}
+
+	sess := session.FromContext(c)
+
+	user.Username = userInfo.Username
+	user.PaypalUsername = userInfo.PaypalUsername
+	user.Iban = userInfo.Iban
+
+	sess.Set("user", user)
+
+	username := user.Username.String
+	if username == "" {
+		username = user.Email
+	}
+
+	Render(c, views.UserNav(username))
+	return Render(c, views.UserInfo(user))
 }

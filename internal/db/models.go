@@ -20,8 +20,9 @@ type Session struct {
 }
 
 type SessionParticipant struct {
-	SessionID uuid.UUID `json:"session_id"`
-	UserID    uuid.UUID `json:"user_id"`
+	SessionID uuid.UUID          `json:"session_id"`
+	UserID    uuid.UUID          `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Transaction struct {
@@ -40,8 +41,12 @@ type TransactionParticipant struct {
 }
 
 type User struct {
-	ID        uuid.UUID          `json:"id"`
-	Username  string             `json:"username"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	ID             uuid.UUID             `json:"id"`
+	Email          string                `json:"email"`
+	Username       types.Text            `json:"username"`
+	Picture        types.Text            `json:"picture"`
+	PaypalUsername types.Text            `json:"paypal_username"`
+	Iban           types.EncryptedString `json:"iban"`
+	CreatedAt      pgtype.Timestamptz    `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz    `json:"updated_at"`
 }

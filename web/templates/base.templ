@@ -14,6 +14,20 @@ func GetUser(ctx context.Context) db.User {
 	return db.User{}
 }
 
+func GetUsername(ctx context.Context) string {
+	user := GetUser(ctx)
+
+	if user.Email == "" {
+		return ""
+	}
+
+	if user.Username.String == "" {
+		return user.Email
+	}
+
+	return user.Username.String
+}
+
 func isProd(ctx context.Context) bool {
 	if isProd, ok := ctx.Value("isProd").(bool); ok {
 		return isProd
@@ -72,15 +86,7 @@ templ Layout(title string) {
 								<div class="text-xs text-slate-400 -mt-0.5">Split the bill, fair, simply</div>
 							</div>
 						</a>
-						<nav class="flex items-center">
-							if GetUser(ctx).Username == "" {
-								<a href="/login" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Accedi</a>
-							} else {
-								<span class="text-gray-300 mr-4 capitalize">{ GetUser(ctx).Username }</span>
-								<div class="h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>
-								<a href="/logout" class="ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
-							}
-						</nav>
+						@UserNav(GetUsername(ctx))
 					</div>
 				</header>
 				<main class="flex-1 flex items-center justify-center px-4 py-8">
@@ -121,12 +127,24 @@ templ Layout(title string) {
 	</html>
 }
 
+templ UserNav(username string) {
+	<nav id="user-nav" hx-swap-oob="true" class="flex items-center">
+		if username == "" {
+			<a href="/login" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Accedi</a>
+		} else {
+			<a href="/user"><span class="text-gray-300 mr-4">{ username }</span></a>
+			<div class="h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>
+			<a href="/logout" class="ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
+		}
+	</nav>
+}
+
 templ Dashboard(sessions []db.Session) {
 	@Layout("- Dashboard") {
 		<div x-data={ fmt.Sprintf("{ openNewSessionModal: false, numSessions: %d }", len(sessions)) } class="space-y-6 fade-in">
 			<!-- Card utente -->
 			<div class="bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg">
-				<h1 class="text-2xl font-semibold">Ciao <b class="capitalize">{ GetUser(ctx).Username }</b>👋</h1>
+				<h1 class="text-2xl font-semibold">Ciao <b>{ GetUsername(ctx) }</b>👋</h1>
 				<p class="text-slate-300 mt-1">Ecco tutte le tue sessioni.</p>
 			</div>
 			<!-- Lista sessioni -->
@@ -174,7 +192,7 @@ templ Dashboard(sessions []db.Session) {
 								name="name"
 								required
 								class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white placeholder-slate-400 focus:(outline-none ring-2 ring-emerald-500)"
-								placeholder="Es. Vacanza a Roma"
+								placeholder="Es. Vacanza"
 							/>
 						</div>
 						<div class="flex justify-end gap-2">

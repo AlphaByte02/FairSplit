@@ -20,8 +20,12 @@ func (s *Server) RegisterRoutes() {
 	s.Get("/", RequireAuth, handlers.HandleIndex)
 
 	s.Get("/login", handlers.Login)
-	s.Post("/login", handlers.HandleLogin)
+	s.Get("/auth/google", handlers.HandleGoogleLogin)
+	s.Get("/auth/google/callback", handlers.HandleGoogleLoginCallback)
 	s.Get("/logout", RequireAuth, handlers.HandleLogout)
+
+	s.Get("/user", RequireAuth, handlers.User)
+	s.Patch("/user", RequireAuth, handlers.HandleUpdateUser)
 
 	s.Post("/sessions/new", RequireAuth, handlers.HandleSession)
 	s.Get("/sessions/:id", RequireAuth, HaveSessionAccess, handlers.Session)

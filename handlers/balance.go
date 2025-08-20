@@ -53,7 +53,7 @@ func BalancesIntermediate(c fiber.Ctx) error {
 	participants := slices.Collect(maps.Values(balances))
 
 	slices.SortFunc(participants, func(a, b views.IntermediateBalanceParticipant) int {
-		return strings.Compare(a.Debtor.Username, b.Debtor.Username)
+		return strings.Compare(a.Debtor.Username.String, b.Debtor.Username.String)
 	})
 
 	return Render(c, views.IntermediateBalance(session, participants))

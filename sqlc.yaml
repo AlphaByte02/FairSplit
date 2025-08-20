@@ -31,5 +31,7 @@ sql:
                     go_type:
                         import: "github.com/AlphaByte02/FairSplit/internal/types"
                         type: "Text"
-                  - column: "users.password"
-                    go_struct_tag: 'json:"-"'
+                  - column: "users.iban"
+                    go_type:
+                        import: "github.com/AlphaByte02/FairSplit/internal/types"
+                        type: "EncryptedString"
