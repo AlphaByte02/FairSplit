@@ -33,6 +33,12 @@ func HandleUpdateUser(c fiber.Ctx) error {
 	}
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+
+	exists, err := Q.CheckUserExists(c, newUsername)
+	if err != nil || exists {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questo username esiste già")
+	}
+
 	err = Q.UpdateUser(
 		c,
 		db.UpdateUserParams{
@@ -43,7 +49,7 @@ func HandleUpdateUser(c fiber.Ctx) error {
 		},
 	)
 	if err != nil {
-		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore", "Impossibile salvare l'utente")
+		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore", "Impossibile aggiornare l'utente")
 	}
 
 	sess := session.FromContext(c)

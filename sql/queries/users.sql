@@ -56,3 +56,15 @@ RETURNING
 DELETE FROM users
 WHERE
     id = $1;
+
+
+-- name: CheckUserExists :one
+SELECT
+    EXISTS (
+        SELECT
+            1
+        FROM
+            users
+        WHERE
+            LOWER(username) = LOWER($1)
+    );

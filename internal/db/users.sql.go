@@ -12,6 +12,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkUserExists = `-- name: CheckUserExists :one
+SELECT
+    EXISTS (
+        SELECT
+            1
+        FROM
+            users
+        WHERE
+            LOWER(username) = LOWER($1)
+    )
+`
+
+func (q *Queries) CheckUserExists(ctx context.Context, lower string) (bool, error) {
+	row := q.db.QueryRow(ctx, checkUserExists, lower)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO
     users (id, email, username, picture)

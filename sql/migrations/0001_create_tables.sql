@@ -2,7 +2,7 @@
 CREATE TABLE users (
   id UUID PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
-  username TEXT,
+  username TEXT UNIQUE,
   picture TEXT,
   paypal_username TEXT,
   iban TEXT,
