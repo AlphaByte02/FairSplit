@@ -129,6 +129,32 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
+const getUserByEmailOrUsername = `-- name: GetUserByEmailOrUsername :one
+SELECT
+    id, email, username, picture, paypal_username, iban, created_at, updated_at
+FROM
+    users
+WHERE
+    email = $1
+    OR LOWER(username) = LOWER($1)
+`
+
+func (q *Queries) GetUserByEmailOrUsername(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmailOrUsername, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.Picture,
+		&i.PaypalUsername,
+		&i.Iban,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByUsername = `-- name: GetUserByUsername :one
 SELECT
     id, email, username, picture, paypal_username, iban, created_at, updated_at

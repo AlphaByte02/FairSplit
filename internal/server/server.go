@@ -34,7 +34,10 @@ func (s *Server) RegisterRoutes() {
 	s.Post("/sessions/:id/invite", RequireAuth, HaveSessionAccess, handlers.SessionInvite)
 	s.Delete("/sessions/:id/kick/:partecipant", RequireAuth, HaveSessionAccess, handlers.SessionKick)
 
+	s.Get("/sessions/:id/transactions", RequireAuth, HaveSessionAccess, handlers.Transaction)
 	s.Post("/sessions/:id/transactions", RequireAuth, HaveSessionAccess, handlers.HandleTransaction)
+	s.Get("/sessions/:id/transactions/:transaction", RequireAuth, HaveSessionAccess, handlers.EditTransaction)
+	s.Patch("/sessions/:id/transactions/:transaction", RequireAuth, HaveSessionAccess, handlers.HandleEditTransaction)
 	s.Delete("/sessions/:id/transactions/:transaction", RequireAuth, HaveSessionAccess, handlers.DeleteTransaction)
 
 	s.Get("/sessions/:id/balances/intermediate", RequireAuth, HaveSessionAccess, handlers.BalancesIntermediate)

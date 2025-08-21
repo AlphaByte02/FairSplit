@@ -31,6 +31,7 @@ type Transaction struct {
 	PayerID     uuid.UUID          `json:"payer_id"`
 	Amount      types.Numeric      `json:"amount"`
 	Description types.Text         `json:"description"`
+	CreatedByID uuid.UUID          `json:"created_by_id"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }

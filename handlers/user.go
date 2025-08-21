@@ -35,7 +35,7 @@ func HandleUpdateUser(c fiber.Ctx) error {
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
 	exists, err := Q.CheckUserExists(c, newUsername)
-	if err != nil || exists {
+	if (err != nil || exists) && newUsername != user.Username.String {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questo username esiste già")
 	}
 
@@ -60,11 +60,6 @@ func HandleUpdateUser(c fiber.Ctx) error {
 
 	sess.Set("user", user)
 
-	username := user.Username.String
-	if username == "" {
-		username = user.Email
-	}
-
-	Render(c, views.UserNav(username))
+	Render(c, views.UserNav(user))
 	return Render(c, views.UserInfo(user))
 }

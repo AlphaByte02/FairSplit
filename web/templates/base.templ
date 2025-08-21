@@ -14,9 +14,7 @@ func GetUser(ctx context.Context) db.User {
 	return db.User{}
 }
 
-func GetUsername(ctx context.Context) string {
-	user := GetUser(ctx)
-
+func GetUsername(user db.User) string {
 	if user.Email == "" {
 		return ""
 	}
@@ -87,7 +85,7 @@ templ Layout(title string) {
 								<div class="text-xs text-slate-400 -mt-0.5">Split the bill, fair, simply</div>
 							</div>
 						</a>
-						@UserNav(GetUsername(ctx))
+						@UserNav(GetUser(ctx))
 					</div>
 				</header>
 				<main class="flex-1 flex items-center justify-center px-4 py-8">
@@ -128,14 +126,31 @@ templ Layout(title string) {
 	</html>
 }
 
-templ UserNav(username string) {
+templ UserNav(user db.User) {
+	{{ username := GetUsername(user) }}
 	<nav id="user-nav" hx-swap-oob="true" class="flex items-center">
 		if username == "" {
 			<a href="/login" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Accedi</a>
 		} else {
-			<a href="/user"><span class="text-gray-300 mr-4">{ username }</span></a>
-			<div class="h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>
-			<a href="/logout" class="ml-1 px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
+			<div class="flex items-center gap-4">
+				<a href="/user">
+					<span class="text-slate-200 font-medium hidden sm:inline">{ username }</span>
+				</a>
+				if user.Picture.String != "" {
+					<a href="/user">
+						<div class="relative">
+							<img
+								src={ user.Picture.String }
+								alt="profile"
+								class="w-9 h-9 rounded-full border border-slate-700 shadow-sm object-cover
+                            hover:scale-105 hover:shadow-lg transition-all duration-200"
+							/>
+						</div>
+					</a>
+				}
+				<div class="h-9 w-px self-stretch bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"></div>
+				<a href="/logout" class="px-3 py-1 rounded-md hover:bg-white/6 transition">Esci</a>
+			</div>
 		}
 	</nav>
 }
@@ -145,7 +160,7 @@ templ Dashboard(sessions []db.Session) {
 		<div x-data={ fmt.Sprintf("{ openNewSessionModal: false, numSessions: %d }", len(sessions)) } class="space-y-6 fade-in">
 			<!-- Card utente -->
 			<div class="bg-white/4 border border-white/8 backdrop-blur-md rounded-xl p-6 shadow-lg">
-				<h1 class="text-2xl font-semibold">Ciao <b>{ GetUsername(ctx) }</b>👋</h1>
+				<h1 class="text-2xl font-semibold">Ciao <b>{ GetUsername(GetUser(ctx)) }</b>👋</h1>
 				<p class="text-slate-300 mt-1">Ecco tutte le tue sessioni.</p>
 			</div>
 			<!-- Lista sessioni -->

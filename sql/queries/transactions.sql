@@ -1,3 +1,12 @@
+-- name: GetTransaction :one
+SELECT
+    *
+FROM
+    transactions
+WHERE
+    id = $1;
+
+
 -- name: ListTransactionsBySession :many
 SELECT
     t.*,
@@ -41,11 +50,22 @@ ORDER BY
     t.created_at DESC;
 
 
+-- name: UpdateTransactions :exec
+UPDATE transactions
+SET
+    session_id = $2,
+    payer_id = $3,
+    amount = $4,
+    description = $5
+WHERE
+    id = $1;
+
+
 -- name: CreateTransaction :one
 INSERT INTO
-    transactions (id, session_id, payer_id, amount, description)
+    transactions (id, session_id, payer_id, amount, description, created_by_id)
 VALUES
-    ($1, $2, $3, $4, $5)
+    ($1, $2, $3, $4, $5, $6)
 RETURNING
     *;
 
@@ -55,6 +75,18 @@ INSERT INTO
     transaction_participants (transaction_id, user_id)
 VALUES
     ($1, $2);
+
+
+-- name: ListTransactionParticipants :many
+SELECT
+    u.*
+FROM
+    transaction_participants tp
+    JOIN users u ON u.id = tp.user_id
+WHERE
+    transaction_id = $1
+ORDER BY
+    u.username;
 
 
 -- name: DeleteTransaction :exec

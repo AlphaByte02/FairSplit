@@ -68,7 +68,7 @@ func SessionInvite(c fiber.Ctx) error {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'username non può essere vuoto")
 	}
 
-	participant, err := Q.GetUserByUsername(c, username)
+	participant, err := Q.GetUserByEmailOrUsername(c, username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questo utente non esiste")
@@ -86,7 +86,10 @@ func SessionInvite(c fiber.Ctx) error {
 
 	Render(c, views.PartecipantsModalList(session, participants))
 	Render(c, views.PartecipantsCount(len(participants)))
-	return Render(c, views.NewTransactionModalContent(session, participants, false))
+	return Render(
+		c,
+		views.TransactionModalContent(views.TransactionModalProps{Session: session, AllParticipants: participants}),
+	)
 }
 
 func SessionKick(c fiber.Ctx) error {
@@ -114,7 +117,10 @@ func SessionKick(c fiber.Ctx) error {
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
 
 	Render(c, views.PartecipantsCount(len(participants)))
-	return Render(c, views.NewTransactionModalContent(session, participants, true))
+	return Render(
+		c,
+		views.TransactionModalContent(views.TransactionModalProps{Session: session, AllParticipants: participants}),
+	)
 }
 
 func SessionClose(c fiber.Ctx) error {

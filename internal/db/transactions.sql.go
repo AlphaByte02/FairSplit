@@ -48,11 +48,11 @@ func (q *Queries) CountTransactionByUser(ctx context.Context, userID uuid.UUID) 
 
 const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO
-    transactions (id, session_id, payer_id, amount, description)
+    transactions (id, session_id, payer_id, amount, description, created_by_id)
 VALUES
-    ($1, $2, $3, $4, $5)
+    ($1, $2, $3, $4, $5, $6)
 RETURNING
-    id, session_id, payer_id, amount, description, created_at, updated_at
+    id, session_id, payer_id, amount, description, created_by_id, created_at, updated_at
 `
 
 type CreateTransactionParams struct {
@@ -61,6 +61,7 @@ type CreateTransactionParams struct {
 	PayerID     uuid.UUID     `json:"payer_id"`
 	Amount      types.Numeric `json:"amount"`
 	Description types.Text    `json:"description"`
+	CreatedByID uuid.UUID     `json:"created_by_id"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -70,6 +71,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.PayerID,
 		arg.Amount,
 		arg.Description,
+		arg.CreatedByID,
 	)
 	var i Transaction
 	err := row.Scan(
@@ -78,6 +80,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.PayerID,
 		&i.Amount,
 		&i.Description,
+		&i.CreatedByID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -95,10 +98,76 @@ func (q *Queries) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getTransaction = `-- name: GetTransaction :one
+SELECT
+    id, session_id, payer_id, amount, description, created_by_id, created_at, updated_at
+FROM
+    transactions
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetTransaction(ctx context.Context, id uuid.UUID) (Transaction, error) {
+	row := q.db.QueryRow(ctx, getTransaction, id)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.PayerID,
+		&i.Amount,
+		&i.Description,
+		&i.CreatedByID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listTransactionParticipants = `-- name: ListTransactionParticipants :many
+SELECT
+    u.id, u.email, u.username, u.picture, u.paypal_username, u.iban, u.created_at, u.updated_at
+FROM
+    transaction_participants tp
+    JOIN users u ON u.id = tp.user_id
+WHERE
+    transaction_id = $1
+ORDER BY
+    u.username
+`
+
+func (q *Queries) ListTransactionParticipants(ctx context.Context, transactionID uuid.UUID) ([]User, error) {
+	rows, err := q.db.Query(ctx, listTransactionParticipants, transactionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Username,
+			&i.Picture,
+			&i.PaypalUsername,
+			&i.Iban,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTransactions = `-- name: ListTransactions :many
 SELECT
     /* sql-formatter-disable */
-    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
+    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_by_id, t.created_at, t.updated_at,
     s.id, s.created_by_id, s.name, s.is_closed, s.created_at, s.updated_at
     /* sql-formatter-enable */
 FROM
@@ -128,6 +197,7 @@ func (q *Queries) ListTransactions(ctx context.Context) ([]ListTransactionsRow, 
 			&i.Transaction.PayerID,
 			&i.Transaction.Amount,
 			&i.Transaction.Description,
+			&i.Transaction.CreatedByID,
 			&i.Transaction.CreatedAt,
 			&i.Transaction.UpdatedAt,
 			&i.Session.ID,
@@ -149,7 +219,7 @@ func (q *Queries) ListTransactions(ctx context.Context) ([]ListTransactionsRow, 
 
 const listTransactionsBySession = `-- name: ListTransactionsBySession :many
 SELECT
-    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
+    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_by_id, t.created_at, t.updated_at,
     /* sql-formatter-disable */
     payer.id, payer.email, payer.username, payer.picture, payer.paypal_username, payer.iban, payer.created_at, payer.updated_at,
     /* sql-formatter-enable */
@@ -183,6 +253,7 @@ type ListTransactionsBySessionRow struct {
 	PayerID      uuid.UUID          `json:"payer_id"`
 	Amount       types.Numeric      `json:"amount"`
 	Description  types.Text         `json:"description"`
+	CreatedByID  uuid.UUID          `json:"created_by_id"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 	User         User               `json:"user"`
@@ -204,6 +275,7 @@ func (q *Queries) ListTransactionsBySession(ctx context.Context, sessionID uuid.
 			&i.PayerID,
 			&i.Amount,
 			&i.Description,
+			&i.CreatedByID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.User.ID,
@@ -224,4 +296,34 @@ func (q *Queries) ListTransactionsBySession(ctx context.Context, sessionID uuid.
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTransactions = `-- name: UpdateTransactions :exec
+UPDATE transactions
+SET
+    session_id = $2,
+    payer_id = $3,
+    amount = $4,
+    description = $5
+WHERE
+    id = $1
+`
+
+type UpdateTransactionsParams struct {
+	ID          uuid.UUID     `json:"id"`
+	SessionID   uuid.UUID     `json:"session_id"`
+	PayerID     uuid.UUID     `json:"payer_id"`
+	Amount      types.Numeric `json:"amount"`
+	Description types.Text    `json:"description"`
+}
+
+func (q *Queries) UpdateTransactions(ctx context.Context, arg UpdateTransactionsParams) error {
+	_, err := q.db.Exec(ctx, updateTransactions,
+		arg.ID,
+		arg.SessionID,
+		arg.PayerID,
+		arg.Amount,
+		arg.Description,
+	)
+	return err
 }

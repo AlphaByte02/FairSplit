@@ -7,6 +7,7 @@ TODO:
 -   [x] OAuth2 login
 -   [ ] ~~Edit~~/Delete user
 -   [ ] ~~Edit~~/Delete session
--   [ ] Edit/Delete transaction
+-   [x] Edit/Delete transaction
 -   [ ] Internalization
 -   [ ] Homepage
+-   [ ] Materialize on a table the final balance when the session is closed

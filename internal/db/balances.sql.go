@@ -15,7 +15,7 @@ import (
 const getIntermediateBalances = `-- name: GetIntermediateBalances :many
 SELECT
     /* sql-formatter-disable */
-    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_at, t.updated_at,
+    t.id, t.session_id, t.payer_id, t.amount, t.description, t.created_by_id, t.created_at, t.updated_at,
     payer.id, payer.email, payer.username, payer.picture, payer.paypal_username, payer.iban, payer.created_at, payer.updated_at,
     dep.id, dep.email, dep.username, dep.picture, dep.paypal_username, dep.iban, dep.created_at, dep.updated_at,
     /* sql-formatter-enable */
@@ -58,6 +58,7 @@ func (q *Queries) GetIntermediateBalances(ctx context.Context, sessionID uuid.UU
 			&i.Transaction.PayerID,
 			&i.Transaction.Amount,
 			&i.Transaction.Description,
+			&i.Transaction.CreatedByID,
 			&i.Transaction.CreatedAt,
 			&i.Transaction.UpdatedAt,
 			&i.User.ID,

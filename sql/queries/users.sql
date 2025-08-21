@@ -25,6 +25,16 @@ WHERE
     LOWER(username) = LOWER($1);
 
 
+-- name: GetUserByEmailOrUsername :one
+SELECT
+    *
+FROM
+    users
+WHERE
+    email = $1
+    OR LOWER(username) = LOWER($1);
+
+
 -- name: UpdateUser :exec
 UPDATE users
 SET

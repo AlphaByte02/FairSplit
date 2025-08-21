@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
 	"github.com/AlphaByte02/FairSplit/internal/service/google"
@@ -85,7 +86,12 @@ func HandleGoogleLoginCallback(c fiber.Ctx) error {
 			newUserID, _ := uuid.NewV7()
 			user, err = Q.CreateUser(
 				c,
-				db.CreateUserParams{ID: newUserID, Email: userInfo.Email, Picture: types.NewText(userInfo.Picture)},
+				db.CreateUserParams{
+					ID:       newUserID,
+					Email:    userInfo.Email,
+					Username: types.NewText(strings.ReplaceAll(userInfo.Name, " ", "")),
+					Picture:  types.NewText(userInfo.Picture),
+				},
 			)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).SendString("Errore creazione user")

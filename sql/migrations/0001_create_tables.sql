@@ -45,6 +45,7 @@ CREATE TABLE transactions (
   payer_id UUID NOT NULL REFERENCES users (id),
   amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0),
   description TEXT,
+  created_by_id UUID NOT NULL REFERENCES users (id),
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
@@ -58,7 +59,7 @@ CREATE INDEX idx_transactions_payer_id ON transactions (payer_id);
 
 CREATE TABLE transaction_participants (
   transaction_id UUID NOT NULL REFERENCES transactions (id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users (id),
   PRIMARY KEY (transaction_id, user_id)
 );
 
