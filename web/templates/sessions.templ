@@ -234,7 +234,7 @@ templ Session(session db.Session, participants []db.User, transactions []db.List
 		>
 			<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
 				<h2 class="text-xl font-bold text-white mb-4">Invita utente</h2>
-				<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModal" hx-swap="innerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
+				<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModalContent" hx-swap="innerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
 					<input type="text" name="username" placeholder="Username" class="w-full mb-3 p-2 rounded bg-gray-800 text-white" required/>
 					<div class="flex justify-end gap-2">
 						<button type="button" @click="openInviteModal = false" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg">Annulla</button>

@@ -12,11 +12,13 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
+var sessionRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-\s]{3,20}$`)
+
 func HandleSession(c fiber.Ctx) error {
 	user := fiber.Locals[db.User](c, "user")
 
-	name := c.FormValue("name")
-	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(name) {
+	name := strings.Trim(c.FormValue("name"), " ")
+	if !sessionRegex.MatchString(name) {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nome sessione non valido")
 	}
 
@@ -168,8 +170,8 @@ func SessionRename(c fiber.Ctx) error {
 		)
 	}
 
-	newName := c.FormValue("name")
-	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(newName) {
+	newName := strings.Trim(c.FormValue("name"), " ")
+	if !sessionRegex.MatchString(newName) {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nome sessione non valido")
 	}
 

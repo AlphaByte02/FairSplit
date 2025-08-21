@@ -107,7 +107,15 @@ templ FinalBalance(session db.Session, transfers []BalanceTransferItem) {
 			<p class="text-gray-400">Nessun debito da regolare 🎉</p>
 		} else {
 			for _, tr := range transfers {
-				<div x-data="{ expanded: false }" @click="expanded = !expanded" class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md">
+				<div
+					x-data="{ expanded: false }"
+					@click="expanded = !expanded"
+					if tr.From.ID == GetUser(ctx).ID {
+						class="bg-gray-800/60 border border-orange-500/40 rounded-xl p-4 shadow-md"
+					} else {
+						class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md"
+					}
+				>
 					<div class="flex items-center justify-between">
 						<div>
 							<span class="text-gray-200 font-medium">{ tr.From.Username.String }</span>

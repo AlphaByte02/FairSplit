@@ -533,7 +533,7 @@ func Session(session db.Session, participants []db.User, transactions []db.ListT
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-target=\"#newTransactionModal\" hx-swap=\"innerHTML\" @htmx:after-request=\"openInviteModal = false; $el.reset()\"><input type=\"text\" name=\"username\" placeholder=\"Username\" class=\"w-full mb-3 p-2 rounded bg-gray-800 text-white\" required><div class=\"flex justify-end gap-2\"><button type=\"button\" @click=\"openInviteModal = false\" class=\"px-4 py-2 bg-gray-700 text-gray-300 rounded-lg\">Annulla</button> <button type=\"submit\" class=\"px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-200 rounded-lg hover:bg-sky-500/30\">Invita</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-target=\"#newTransactionModalContent\" hx-swap=\"innerHTML\" @htmx:after-request=\"openInviteModal = false; $el.reset()\"><input type=\"text\" name=\"username\" placeholder=\"Username\" class=\"w-full mb-3 p-2 rounded bg-gray-800 text-white\" required><div class=\"flex justify-end gap-2\"><button type=\"button\" @click=\"openInviteModal = false\" class=\"px-4 py-2 bg-gray-700 text-gray-300 rounded-lg\">Annulla</button> <button type=\"submit\" class=\"px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-200 rounded-lg hover:bg-sky-500/30\">Invita</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

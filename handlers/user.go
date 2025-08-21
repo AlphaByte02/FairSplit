@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/session"
 )
 
+var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-]{3,20}$`)
+
 func User(c fiber.Ctx) error {
 	return Render(c, views.User())
 }
@@ -28,7 +30,7 @@ func HandleUpdateUser(c fiber.Ctx) error {
 	}
 
 	newUsername := userInfo.Username.String
-	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`).MatchString(newUsername) {
+	if !usernameRegex.MatchString(newUsername) {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Username non valido")
 	}
 

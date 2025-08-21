@@ -241,123 +241,138 @@ func FinalBalance(session db.Session, transfers []BalanceTransferItem) templ.Com
 			}
 		} else {
 			for _, tr := range transfers {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div x-data=\"{ expanded: false }\" @click=\"expanded = !expanded\" class=\"bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md\"><div class=\"flex items-center justify-between\"><div><span class=\"text-gray-200 font-medium\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div x-data=\"{ expanded: false }\" @click=\"expanded = !expanded\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if tr.From.ID == GetUser(ctx).ID {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " class=\"bg-gray-800/60 border border-orange-500/40 rounded-xl p-4 shadow-md\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " class=\"bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "><div class=\"flex items-center justify-between\"><div><span class=\"text-gray-200 font-medium\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(tr.From.Username.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 113, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 121, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span> <span class=\"text-gray-400\">deve a </span> <span class=\"text-gray-200 font-medium\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span> <span class=\"text-gray-400\">deve a </span> <span class=\"text-gray-200 font-medium\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(tr.To.Username.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 115, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 123, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</span></div><span class=\"text-emerald-400 font-bold text-lg tracking-wide\">€")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span></div><span class=\"text-emerald-400 font-bold text-lg tracking-wide\">€")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.02f", tr.Amount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 117, Col: 105}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 125, Col: 105}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</span></div><div x-show=\"expanded\" x-transition><hr class=\"h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700\"><div class=\"flex items-center justify-center space-x-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></div><div x-show=\"expanded\" x-transition><hr class=\"h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700\"><div class=\"flex items-center justify-center space-x-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if tr.To.Iban != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button x-data=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<button x-data=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ copied: false, iban: '%s'}", tr.To.Iban))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 124, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 132, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" @click.stop @click=\"navigator.clipboard.writeText(iban); copied = true; setTimeout(() => copied = false, 2000)\" class=\"flex items-center justify-center gap-2 px-5 py-3\n\t\t\t\t\t\t\t\t\trounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50\n\t\t\t\t\t\t\t\t\thover:bg-slate-700/70 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20\n\t\t\t\t\t\t\t\t\ttransition-all duration-200 text-white font-medium\"><!-- Icona Copy --><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M8 16.5h8m-8-4h8m-8-4h4M3 7.5a2.25 2.25 0 012.25-2.25h9L18 7.5v9A2.25 2.25 0 0115.75 18H5.25A2.25 2.25 0 013 15.75v-8.25zM18 7.5V18a2.25 2.25 0 002.25-2.25V9.75A2.25 2.25 0 0018 7.5z\"></path></svg> <span x-show=\"!copied\">Copy IBAN</span> <span x-show=\"copied\" class=\"text-green-400\">Copied!</span></button> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" @click.stop @click=\"navigator.clipboard.writeText(iban); copied = true; setTimeout(() => copied = false, 2000)\" class=\"flex items-center justify-center gap-2 px-5 py-3\n\t\t\t\t\t\t\t\t\trounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50\n\t\t\t\t\t\t\t\t\thover:bg-slate-700/70 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20\n\t\t\t\t\t\t\t\t\ttransition-all duration-200 text-white font-medium\"><!-- Icona Copy --><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M8 16.5h8m-8-4h8m-8-4h4M3 7.5a2.25 2.25 0 012.25-2.25h9L18 7.5v9A2.25 2.25 0 0115.75 18H5.25A2.25 2.25 0 013 15.75v-8.25zM18 7.5V18a2.25 2.25 0 002.25-2.25V9.75A2.25 2.25 0 0018 7.5z\"></path></svg> <span x-show=\"!copied\">Copy IBAN</span> <span x-show=\"copied\" class=\"text-green-400\">Copied!</span></button> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 				if tr.To.PaypalUsername.String != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<a href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<a href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var16 templ.SafeURL
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("https://paypal.me/%s", tr.To.PaypalUsername.String))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 153, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 161, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" target=\"_blank\"><button @click.stop class=\"flex items-center justify-center gap-2 px-5 py-3\n\t\t\t\t\t\t\t\t\t\trounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50\n\t\t\t\t\t\t\t\t\t\thover:bg-slate-700/70 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20\n\t\t\t\t\t\t\t\t\t\ttransition-all duration-200 text-white font-medium\"><!-- Icona PayPal --><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"w-5 h-5 text-[#009cde]\"><path d=\"M7.5 21H5.2c-.6 0-1-.5-.9-1.1l1.9-12.3c.1-.5.5-.9 1-.9h6.5c2.5 0 4.4.5 5.6 1.6 1.2 1 1.7 2.6 1.3 4.8-.6 3.7-2.8 5.6-6.5 5.6h-1.6l-.5 3.2c-.1.6-.6 1.1-1.2 1.1H7.5z\"></path></svg> <span>Pay with PayPal</span></button></a> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" target=\"_blank\"><button @click.stop class=\"flex items-center justify-center gap-2 px-5 py-3\n\t\t\t\t\t\t\t\t\t\trounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50\n\t\t\t\t\t\t\t\t\t\thover:bg-slate-700/70 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20\n\t\t\t\t\t\t\t\t\t\ttransition-all duration-200 text-white font-medium\"><!-- Icona PayPal --><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"w-5 h-5 text-[#009cde]\"><path d=\"M7.5 21H5.2c-.6 0-1-.5-.9-1.1l1.9-12.3c.1-.5.5-.9 1-.9h6.5c2.5 0 4.4.5 5.6 1.6 1.2 1 1.7 2.6 1.3 4.8-.6 3.7-2.8 5.6-6.5 5.6h-1.6l-.5 3.2c-.1.6-.6 1.1-1.2 1.1H7.5z\"></path></svg> <span>Pay with PayPal</span></button></a> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 				if tr.To.PaypalUsername.String == "" && tr.To.Iban == "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"flex items-center space-x-2\"><span class=\"italic font-medium text-gray-400\">No info</span></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"flex items-center space-x-2\"><span class=\"italic font-medium text-gray-400\">No info</span></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div><div class=\"flex justify-around items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div><div class=\"flex justify-around items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if GetUser(ctx).ID == session.CreatedByID && !session.IsClosed {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<form hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<form hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("/sessions/" + session.ID.String() + "/close")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 187, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/balance.templ`, Line: 195, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" hx-swap=\"outerHTML\"><button type=\"submit\" class=\"px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-200 hover:bg-red-500/30\">Chiudi sessione</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" hx-swap=\"outerHTML\"><button type=\"submit\" class=\"px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-200 hover:bg-red-500/30\">Chiudi sessione</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
