@@ -30,17 +30,24 @@ func (q *Queries) AddTransactionParticipant(ctx context.Context, arg AddTransact
 	return err
 }
 
-const countTransactionByUser = `-- name: CountTransactionByUser :one
+const countTransactionByUserAndSession = `-- name: CountTransactionByUserAndSession :one
 SELECT
     COUNT(tp.*) AS "count"
 FROM
     transaction_participants tp
+    JOIN transactions t ON t.id = tp.transaction_id
 WHERE
     tp.user_id = $1
+    AND t.session_id = $2
 `
 
-func (q *Queries) CountTransactionByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
-	row := q.db.QueryRow(ctx, countTransactionByUser, userID)
+type CountTransactionByUserAndSessionParams struct {
+	UserID    uuid.UUID `json:"user_id"`
+	SessionID uuid.UUID `json:"session_id"`
+}
+
+func (q *Queries) CountTransactionByUserAndSession(ctx context.Context, arg CountTransactionByUserAndSessionParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countTransactionByUserAndSession, arg.UserID, arg.SessionID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

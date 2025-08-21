@@ -99,10 +99,12 @@ WHERE
     id = $1;
 
 
--- name: CountTransactionByUser :one
+-- name: CountTransactionByUserAndSession :one
 SELECT
     COUNT(tp.*) AS "count"
 FROM
     transaction_participants tp
+    JOIN transactions t ON t.id = tp.transaction_id
 WHERE
-    tp.user_id = $1;
+    tp.user_id = $1
+    AND t.session_id = $2;

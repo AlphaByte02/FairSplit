@@ -106,7 +106,10 @@ func SessionKick(c fiber.Ctx) error {
 
 	toKickID, _ := fiber.Convert(c.Params("partecipant"), uuid.Parse)
 
-	count, _ := Q.CountTransactionByUser(c, toKickID)
+	count, _ := Q.CountTransactionByUserAndSession(
+		c,
+		db.CountTransactionByUserAndSessionParams{UserID: toKickID, SessionID: session.ID},
+	)
 	if count > 0 {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Non puoi rimuovere questo utente")
 	}
