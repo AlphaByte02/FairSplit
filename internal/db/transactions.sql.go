@@ -223,7 +223,11 @@ SELECT
     /* sql-formatter-disable */
     payer.id, payer.email, payer.username, payer.picture, payer.paypal_username, payer.iban, payer.created_at, payer.updated_at,
     /* sql-formatter-enable */
-    ARRAY_AGG(DISTINCT u.username)::TEXT[] AS participants
+    ARRAY_AGG(
+        u.username
+        ORDER BY
+            LOWER(u.username)
+    )::TEXT[] AS participants
 FROM
     transactions t
     JOIN users payer ON payer.id = t.payer_id

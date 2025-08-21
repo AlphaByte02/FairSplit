@@ -43,7 +43,7 @@ FROM
 WHERE
     session_id = $1
 ORDER BY
-    u.username;
+    LOWER(u.username);
 
 
 -- name: AddSessionParticipant :exec

@@ -168,7 +168,7 @@ FROM
 WHERE
     session_id = $1
 ORDER BY
-    u.username
+    LOWER(u.username)
 `
 
 func (q *Queries) ListSessionParticipants(ctx context.Context, sessionID uuid.UUID) ([]User, error) {

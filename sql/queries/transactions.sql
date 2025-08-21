@@ -13,7 +13,11 @@ SELECT
     /* sql-formatter-disable */
     sqlc.embed(payer),
     /* sql-formatter-enable */
-    ARRAY_AGG(DISTINCT u.username)::TEXT[] AS participants
+    ARRAY_AGG(
+        u.username
+        ORDER BY
+            LOWER(u.username)
+    )::TEXT[] AS participants
 FROM
     transactions t
     JOIN users payer ON payer.id = t.payer_id
