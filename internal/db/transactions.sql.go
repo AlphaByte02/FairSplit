@@ -132,7 +132,7 @@ FROM
 WHERE
     transaction_id = $1
 ORDER BY
-    u.username
+    LOWER(u.username)
 `
 
 func (q *Queries) ListTransactionParticipants(ctx context.Context, transactionID uuid.UUID) ([]User, error) {

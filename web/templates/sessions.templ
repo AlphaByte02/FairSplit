@@ -197,6 +197,7 @@ templ SessionHeader(session db.Session, participants []db.User) {
 					hx-get={ "/sessions/" + session.ID.String() + "/transactions/" }
 					hx-trigger="click"
 					hx-target="#newTransactionModalContent"
+					hx-swap="outerHTML"
 					@htmx:after-request="openNewTransactionModal = true"
 					class="px-4 py-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-lg hover:bg-emerald-500/30"
 				>
@@ -234,7 +235,7 @@ templ Session(session db.Session, participants []db.User, transactions []db.List
 		>
 			<div class="bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg p-6 w-full max-w-md">
 				<h2 class="text-xl font-bold text-white mb-4">Invita utente</h2>
-				<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModalContent" hx-swap="innerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
+				<form hx-post={ "/sessions/" + session.ID.String() + "/invite" } hx-target="#newTransactionModalContent" hx-swap="outerHTML" @htmx:after-request="openInviteModal = false; $el.reset()">
 					<input type="text" name="username" placeholder="Username" class="w-full mb-3 p-2 rounded bg-gray-800 text-white" required/>
 					<div class="flex justify-end gap-2">
 						<button type="button" @click="openInviteModal = false" class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg">Annulla</button>
@@ -271,7 +272,7 @@ templ SessionBody(session db.Session, transactions []db.ListTransactionsBySessio
 			</div>
 		}
 		<!-- Lista transazioni -->
-		@TransactionList(transactions)
+		@TransactionList(session, transactions)
 	</div>
 }
 
@@ -474,10 +475,10 @@ func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) types.
 	return total
 }
 
-templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
+templ TransactionList(session db.Session, transactions []db.ListTransactionsBySessionRow) {
 	<div id="transactions-list" class="flex flex-col gap-3">
 		for _, t := range transactions {
-			@TransactionItem(t)
+			@TransactionItem(session, t)
 		}
 		if len(transactions) == 0 {
 			<div class="text-gray-500 italic">Ancora nessuna transazione.</div>
@@ -493,7 +494,7 @@ templ TransactionList(transactions []db.ListTransactionsBySessionRow) {
 	</div>
 }
 
-templ TransactionItem(transaction db.ListTransactionsBySessionRow) {
+templ TransactionItem(session db.Session, transaction db.ListTransactionsBySessionRow) {
 	<div class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between hover:bg-gray-800/80 transition">
 		<div class="flex flex-col space-y-1">
 			<span class="text-gray-200 font-medium">
@@ -502,11 +503,12 @@ templ TransactionItem(transaction db.ListTransactionsBySessionRow) {
 				} else {
 					{ transaction.ID.String() }
 				}
-				if GetUser(ctx).ID == transaction.CreatedByID {
+				if !session.IsClosed && GetUser(ctx).ID == transaction.CreatedByID {
 					<button
-						hx-get={ "/sessions/" + transaction.SessionID.String() + "/transactions/" + transaction.ID.String() }
+						hx-get={ "/sessions/" + session.ID.String() + "/transactions/" + transaction.ID.String() }
 						hx-trigger="click"
 						hx-target="#newTransactionModalContent"
+						hx-swap="outerHTML"
 						@htmx:after-request="openNewTransactionModal = true"
 						class="text-gray-400 hover:text-emerald-400 transition bg-transparent"
 						title="Edit transaction"

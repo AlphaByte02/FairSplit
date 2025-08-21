@@ -86,7 +86,7 @@ FROM
 WHERE
     transaction_id = $1
 ORDER BY
-    u.username;
+    LOWER(u.username);
 
 
 -- name: DeleteTransaction :exec
