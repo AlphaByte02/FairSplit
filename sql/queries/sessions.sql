@@ -56,7 +56,8 @@ VALUES
 -- name: DeleteSessionParticipant :exec
 DELETE FROM session_participants
 WHERE
-    user_id = $1;
+    session_id = $1
+    AND user_id = $2;
 
 
 -- name: DeleteSession :exec

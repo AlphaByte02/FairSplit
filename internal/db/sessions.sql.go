@@ -109,11 +109,17 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 const deleteSessionParticipant = `-- name: DeleteSessionParticipant :exec
 DELETE FROM session_participants
 WHERE
-    user_id = $1
+    session_id = $1
+    AND user_id = $2
 `
 
-func (q *Queries) DeleteSessionParticipant(ctx context.Context, userID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteSessionParticipant, userID)
+type DeleteSessionParticipantParams struct {
+	SessionID uuid.UUID `json:"session_id"`
+	UserID    uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteSessionParticipant(ctx context.Context, arg DeleteSessionParticipantParams) error {
+	_, err := q.db.Exec(ctx, deleteSessionParticipant, arg.SessionID, arg.UserID)
 	return err
 }
 

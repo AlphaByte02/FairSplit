@@ -114,7 +114,7 @@ func SessionKick(c fiber.Ctx) error {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Non puoi rimuovere questo utente")
 	}
 
-	err := Q.DeleteSessionParticipant(c, toKickID)
+	err := Q.DeleteSessionParticipant(c, db.DeleteSessionParticipantParams{SessionID: session.ID, UserID: toKickID})
 	if err != nil {
 		return SendError(c, fiber.StatusInternalServerError, "danger", "Errore Server", "Errore in rimozione")
 	}
