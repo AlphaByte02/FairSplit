@@ -11,6 +11,7 @@ import (
 	"github.com/AlphaByte02/FairSplit/internal/types"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 const addTransactionParticipant = `-- name: AddTransactionParticipant :exec
@@ -63,12 +64,12 @@ RETURNING
 `
 
 type CreateTransactionParams struct {
-	ID          uuid.UUID     `json:"id"`
-	SessionID   uuid.UUID     `json:"session_id"`
-	PayerID     uuid.UUID     `json:"payer_id"`
-	Amount      types.Numeric `json:"amount"`
-	Description types.Text    `json:"description"`
-	CreatedByID uuid.UUID     `json:"created_by_id"`
+	ID          uuid.UUID       `json:"id"`
+	SessionID   uuid.UUID       `json:"session_id"`
+	PayerID     uuid.UUID       `json:"payer_id"`
+	Amount      decimal.Decimal `json:"amount"`
+	Description types.Text      `json:"description"`
+	CreatedByID uuid.UUID       `json:"created_by_id"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -262,7 +263,7 @@ type ListTransactionsBySessionRow struct {
 	ID           uuid.UUID          `json:"id"`
 	SessionID    uuid.UUID          `json:"session_id"`
 	PayerID      uuid.UUID          `json:"payer_id"`
-	Amount       types.Numeric      `json:"amount"`
+	Amount       decimal.Decimal    `json:"amount"`
 	Description  types.Text         `json:"description"`
 	CreatedByID  uuid.UUID          `json:"created_by_id"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
@@ -321,11 +322,11 @@ WHERE
 `
 
 type UpdateTransactionsParams struct {
-	ID          uuid.UUID     `json:"id"`
-	SessionID   uuid.UUID     `json:"session_id"`
-	PayerID     uuid.UUID     `json:"payer_id"`
-	Amount      types.Numeric `json:"amount"`
-	Description types.Text    `json:"description"`
+	ID          uuid.UUID       `json:"id"`
+	SessionID   uuid.UUID       `json:"session_id"`
+	PayerID     uuid.UUID       `json:"payer_id"`
+	Amount      decimal.Decimal `json:"amount"`
+	Description types.Text      `json:"description"`
 }
 
 func (q *Queries) UpdateTransactions(ctx context.Context, arg UpdateTransactionsParams) error {

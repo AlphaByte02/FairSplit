@@ -2,36 +2,36 @@
 
 FairSplit is a modern web application that helps you **track group expenses** and fairly split payments among friends. Each user can create sessions, record transactions, invite other participants, and finally calculate intermediate or final balances with minimized money transfers.
 
-The project stack:
-
--   **Go** (Fiber v3)
--   **PostgreSQL** (with UUIDv7)
--   **sqlc** (type-safe queries)
--   **templ** (templating engine)
--   **UnoCSS** (with Tailwind-compatible reset)
--   **Alpine.js** & **HTMX** (lightweight interactivity)
--   **Air** (live reload during development)
+Free and open source alternative to Splitwise
 
 ---
 
 ## 🚀 Features
 
--   Simple user login (username-based) (for now™)
--   Create and join sessions
--   Add transactions (including who paid for whom)
+-   Google based login
+-   Create sessions
+-   Invite other users on your session
+-   Add transactions (including easy way to set who paid for whom)
 -   View intermediate balances per user
--   View minimized final settlements
 -   Lock sessions when finished
+-   View minimized final settlements
 -   Responsive dark-mode UI with modern "glass" aesthetics
 
 ---
 
+## 📚 Tech Stack
+
+-   **[go](https://go.dev/)** ([Fiber](https://gofiber.io/) v3)
+-   **PostgreSQL** (with UUIDv7)
+-   **[sqlc](https://sqlc.dev/)** (type-safe queries)
+-   **[templ](https://templ.guide/)** (templating engine)
+-   **[UnoCSS](https://unocss.dev/)** (with Tailwind-compatible reset)
+-   **[Alpine.js](https://alpinejs.dev/)** & **[HTMX](https://htmx.org/)** (lightweight interactivity)
+-   **[air](https://github.com/air-verse/air)** (live reload during development)
+
+---
+
 ## 🛠️ Development
-
-### Requirements
-
--   Go 1.22+
--   Docker & Docker Compose
 
 ### Setup
 
@@ -74,7 +74,7 @@ The project stack:
     ```bash
     go tool templ generate
     ```
-    > If you use air there is no need to do it yourself (unless you made a small change when the service is down)
+    > If you use air there is no need to do it yourself (unless you change the files when the service is down)
 
 ---
 
@@ -104,7 +104,7 @@ By default, the app runs on port **8080**.
 
 This project is for me a way to learn more about variuos way to do web dev.
 
-If you have any suggestions for improvements, new features, or bug fixes open a Issue or Pull Requests are always welcome:
+If you have any suggestions for improvements, new features, or bug fixes feel free to open a Issue or make a Pull Requests:
 
 1. Fork the repo
 2. Create a new branch (`git checkout -b feature/your-feature`)
@@ -119,14 +119,3 @@ Please make sure to update documentation and follow code style conventions.
 ## 📜 License
 
 This project is licensed under the [GNU GPLv3 License](https://choosealicense.com/licenses/gpl-3.0/).
-
----
-
-### ✨ Acknowledgements
-
--   [Fiber](https://gofiber.io/)
--   [templ](https://templ.guide/)
--   [UnoCSS](https://unocss.dev/)
--   [Alpine.js](https://alpinejs.dev/)
--   [HTMX](https://htmx.org/)
--   [sqlc](https://sqlc.dev/)

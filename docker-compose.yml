@@ -17,6 +17,11 @@ services:
         environment:
             DATABASE_URL: postgres://postgres:secret@postgres:5432/fairsplit
             PORT: "8080"
+
+            CRYPT_KEY:
+            GOOGLE_CLIENT_ID:
+            GOOGLE_CLIENT_SECRET:
+            GOOGLE_CALLBACK_URL:
         volumes:
             - ./:/app
         ports:

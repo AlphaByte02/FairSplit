@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/AlphaByte02/FairSplit/internal/db"
-	"github.com/AlphaByte02/FairSplit/internal/types"
+	"github.com/shopspring/decimal"
 	"slices"
 )
 
@@ -941,12 +941,11 @@ func TransactionModalContent(props TransactionModalProps) templ.Component {
 	})
 }
 
-func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) types.Numeric {
-	var total types.Numeric
-	total.Scan("0")
+func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) decimal.Decimal {
+	total := decimal.Zero
 
 	for _, t := range transactions {
-		total, _ = total.Add(t.Amount)
+		total = total.Add(t.Amount)
 	}
 
 	return total
@@ -997,7 +996,7 @@ func TransactionList(session db.Session, transactions []db.ListTransactionsBySes
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(getTransactionsTotal(transactions).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 490, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 489, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
@@ -1045,7 +1044,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 			var templ_7745c5c3_Var40 string
 			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(transaction.Description.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 502, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 501, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 			if templ_7745c5c3_Err != nil {
@@ -1059,7 +1058,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(transaction.ID.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 504, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 503, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -1078,7 +1077,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs("/sessions/" + session.ID.String() + "/transactions/" + transaction.ID.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 508, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 507, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -1096,7 +1095,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 		var templ_7745c5c3_Var43 string
 		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(transaction.User.Username.String)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 533, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 532, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
@@ -1109,7 +1108,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 		var templ_7745c5c3_Var44 string
 		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(len(transaction.Participants))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 542, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 541, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 		if templ_7745c5c3_Err != nil {
@@ -1122,7 +1121,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(transaction.CreatedAt.Time.Format("02/01/2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 543, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 542, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -1140,7 +1139,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 			var templ_7745c5c3_Var46 string
 			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(u)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 552, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 551, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 			if templ_7745c5c3_Err != nil {
@@ -1158,7 +1157,7 @@ func TransactionItem(session db.Session, transaction db.ListTransactionsBySessio
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("€%s", transaction.Amount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 560, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/sessions.templ`, Line: 559, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {

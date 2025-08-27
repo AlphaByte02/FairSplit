@@ -3,7 +3,7 @@ package views
 import (
 	"fmt"
 	"github.com/AlphaByte02/FairSplit/internal/db"
-	"github.com/AlphaByte02/FairSplit/internal/types"
+	"github.com/shopspring/decimal"
 	"slices"
 )
 
@@ -464,12 +464,11 @@ templ TransactionModalContent(props TransactionModalProps) {
 	</div>
 }
 
-func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) types.Numeric {
-	var total types.Numeric
-	total.Scan("0")
+func getTransactionsTotal(transactions []db.ListTransactionsBySessionRow) decimal.Decimal {
+	total := decimal.Zero
 
 	for _, t := range transactions {
-		total, _ = total.Add(t.Amount)
+		total = total.Add(t.Amount)
 	}
 
 	return total

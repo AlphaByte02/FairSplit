@@ -35,7 +35,7 @@ func BalancesIntermediate(c fiber.Ctx) error {
 				Sum:          row.AmountPerUser,
 			}
 		} else {
-			balance.Sum, _ = balance.Sum.Add(row.AmountPerUser)
+			balance.Sum = balance.Sum.Add(row.AmountPerUser)
 		}
 
 		balance.Transactions = append(
@@ -59,63 +59,10 @@ func BalancesIntermediate(c fiber.Ctx) error {
 	return Render(c, views.IntermediateBalance(session, participants))
 }
 
-type balanceItem struct {
-	User   db.User
-	Amount float64
-}
-
 func BalancesFinal(c fiber.Ctx) error {
 	session := fiber.Locals[db.Session](c, "session")
-	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
-	balances, err := Q.GetSessionBalances(c, session.ID)
-	if err != nil {
-		return err
-	}
-
-	var debtors, creditors []balanceItem
-	for _, b := range balances {
-		bal, _ := b.Balance.Float64()
-		if bal > 0.01 {
-			creditors = append(creditors, balanceItem{
-				User:   b.User,
-				Amount: bal,
-			})
-		} else if bal < -0.01 {
-			debtors = append(debtors, balanceItem{
-				User:   b.User,
-				Amount: -bal,
-			})
-		}
-	}
-
-	slices.SortFunc(debtors, func(a, b balanceItem) int {
-		return int(b.Amount - a.Amount)
-	})
-	slices.SortFunc(creditors, func(a, b balanceItem) int {
-		return int(b.Amount - a.Amount)
-	})
-
-	var transfers []views.BalanceTransferItem
-	di, ci := 0, 0
-	for di < len(debtors) && ci < len(creditors) {
-		payAmt := min(debtors[di].Amount, creditors[ci].Amount)
-		if payAmt > 0.01 {
-			transfers = append(transfers, views.BalanceTransferItem{
-				From:   debtors[di].User,
-				To:     creditors[ci].User,
-				Amount: payAmt,
-			})
-		}
-		debtors[di].Amount -= payAmt
-		creditors[ci].Amount -= payAmt
-		if debtors[di].Amount < 0.01 {
-			di++
-		}
-		if creditors[ci].Amount < 0.01 {
-			ci++
-		}
-	}
+	var transfers []db.GetFinalBalancesBySessionRow
 
 	return Render(c, views.FinalBalance(session, transfers))
 }

@@ -81,3 +81,35 @@ SELECT
 FROM
     balances b
     LEFT JOIN users u ON b.user_id = u.id;
+
+
+-- name: SaveFinalBalance :batchone
+INSERT INTO
+    final_balances (id, session_id, creditor_id, debtor_id, amount)
+VALUES
+    ($1, $2, $3, $4, $5)
+RETURNING
+    *;
+
+
+-- name: GetFinalBalancesBySession :many
+SELECT
+    fb.*,
+    /* sql-formatter-disable */
+    sqlc.embed(cred),
+    sqlc.embed(debt)
+    /* sql-formatter-enable */
+FROM
+    final_balances fb
+    LEFT JOIN users cred ON fb.creditor_id = cred.id
+    LEFT JOIN users debt ON fb.debtor_id = debt.id
+WHERE
+    session_id = $1;
+
+
+-- name: SetDeptPaid :exec
+UPDATE final_balances
+SET
+    is_paid = TRUE
+WHERE
+    id = $1;

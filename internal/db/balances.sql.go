@@ -8,9 +8,83 @@ package db
 import (
 	"context"
 
-	"github.com/AlphaByte02/FairSplit/internal/types"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
+
+const getFinalBalancesBySession = `-- name: GetFinalBalancesBySession :many
+SELECT
+    fb.id, fb.session_id, fb.creditor_id, fb.debtor_id, fb.amount, fb.is_paid, fb.created_at, fb.updated_at,
+    /* sql-formatter-disable */
+    cred.id, cred.email, cred.username, cred.picture, cred.paypal_username, cred.iban, cred.created_at, cred.updated_at,
+    debt.id, debt.email, debt.username, debt.picture, debt.paypal_username, debt.iban, debt.created_at, debt.updated_at
+    /* sql-formatter-enable */
+FROM
+    final_balances fb
+    LEFT JOIN users cred ON fb.creditor_id = cred.id
+    LEFT JOIN users debt ON fb.debtor_id = debt.id
+WHERE
+    session_id = $1
+`
+
+type GetFinalBalancesBySessionRow struct {
+	ID         uuid.UUID          `json:"id"`
+	SessionID  uuid.UUID          `json:"session_id"`
+	CreditorID uuid.UUID          `json:"creditor_id"`
+	DebtorID   uuid.UUID          `json:"debtor_id"`
+	Amount     decimal.Decimal    `json:"amount"`
+	IsPaid     bool               `json:"is_paid"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	User       User               `json:"user"`
+	User_2     User               `json:"user_2"`
+}
+
+func (q *Queries) GetFinalBalancesBySession(ctx context.Context, sessionID uuid.UUID) ([]GetFinalBalancesBySessionRow, error) {
+	rows, err := q.db.Query(ctx, getFinalBalancesBySession, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFinalBalancesBySessionRow
+	for rows.Next() {
+		var i GetFinalBalancesBySessionRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.SessionID,
+			&i.CreditorID,
+			&i.DebtorID,
+			&i.Amount,
+			&i.IsPaid,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.User.ID,
+			&i.User.Email,
+			&i.User.Username,
+			&i.User.Picture,
+			&i.User.PaypalUsername,
+			&i.User.Iban,
+			&i.User.CreatedAt,
+			&i.User.UpdatedAt,
+			&i.User_2.ID,
+			&i.User_2.Email,
+			&i.User_2.Username,
+			&i.User_2.Picture,
+			&i.User_2.PaypalUsername,
+			&i.User_2.Iban,
+			&i.User_2.CreatedAt,
+			&i.User_2.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getIntermediateBalances = `-- name: GetIntermediateBalances :many
 SELECT
@@ -37,10 +111,10 @@ ORDER BY
 `
 
 type GetIntermediateBalancesRow struct {
-	Transaction   Transaction   `json:"transaction"`
-	User          User          `json:"user"`
-	User_2        User          `json:"user_2"`
-	AmountPerUser types.Numeric `json:"amount_per_user"`
+	Transaction   Transaction     `json:"transaction"`
+	User          User            `json:"user"`
+	User_2        User            `json:"user_2"`
+	AmountPerUser decimal.Decimal `json:"amount_per_user"`
 }
 
 func (q *Queries) GetIntermediateBalances(ctx context.Context, sessionID uuid.UUID) ([]GetIntermediateBalancesRow, error) {
@@ -151,8 +225,8 @@ FROM
 `
 
 type GetSessionBalancesRow struct {
-	User    User          `json:"user"`
-	Balance types.Numeric `json:"balance"`
+	User    User            `json:"user"`
+	Balance decimal.Decimal `json:"balance"`
 }
 
 func (q *Queries) GetSessionBalances(ctx context.Context, sessionID uuid.UUID) ([]GetSessionBalancesRow, error) {
@@ -183,4 +257,17 @@ func (q *Queries) GetSessionBalances(ctx context.Context, sessionID uuid.UUID) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const setDeptPaid = `-- name: SetDeptPaid :exec
+UPDATE final_balances
+SET
+    is_paid = TRUE
+WHERE
+    id = $1
+`
+
+func (q *Queries) SetDeptPaid(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, setDeptPaid, id)
+	return err
 }

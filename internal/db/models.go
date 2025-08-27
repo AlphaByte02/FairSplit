@@ -8,7 +8,19 @@ import (
 	"github.com/AlphaByte02/FairSplit/internal/types"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
+
+type FinalBalance struct {
+	ID         uuid.UUID          `json:"id"`
+	SessionID  uuid.UUID          `json:"session_id"`
+	CreditorID uuid.UUID          `json:"creditor_id"`
+	DebtorID   uuid.UUID          `json:"debtor_id"`
+	Amount     decimal.Decimal    `json:"amount"`
+	IsPaid     bool               `json:"is_paid"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+}
 
 type Session struct {
 	ID          uuid.UUID          `json:"id"`
@@ -29,7 +41,7 @@ type Transaction struct {
 	ID          uuid.UUID          `json:"id"`
 	SessionID   uuid.UUID          `json:"session_id"`
 	PayerID     uuid.UUID          `json:"payer_id"`
-	Amount      types.Numeric      `json:"amount"`
+	Amount      decimal.Decimal    `json:"amount"`
 	Description types.Text         `json:"description"`
 	CreatedByID uuid.UUID          `json:"created_by_id"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`

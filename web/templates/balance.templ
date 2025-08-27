@@ -4,19 +4,19 @@ import (
 	"fmt"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
-	"github.com/AlphaByte02/FairSplit/internal/types"
+	"github.com/shopspring/decimal"
 )
 
 type IntermediateBalanceTransaction struct {
 	Transaction db.Transaction
 	Payer       db.User
-	Amount      types.Numeric
+	Amount      decimal.Decimal
 }
 
 type IntermediateBalanceParticipant struct {
 	Debtor       db.User
 	Transactions []IntermediateBalanceTransaction
-	Sum          types.Numeric
+	Sum          decimal.Decimal
 }
 
 templ IntermediateBalance(session db.Session, participants []IntermediateBalanceParticipant) {
@@ -75,13 +75,7 @@ templ IntermediateBalance(session db.Session, participants []IntermediateBalance
 	</div>
 }
 
-type BalanceTransferItem struct {
-	From   db.User
-	To     db.User
-	Amount float64
-}
-
-templ FinalBalance(session db.Session, transfers []BalanceTransferItem) {
+templ FinalBalance(session db.Session, transfers []db.GetFinalBalancesBySessionRow) {
 	<div class="flex sm:justify-around items-center mb-2">
 		<div class="flex space-x-3">
 			<button
@@ -102,106 +96,110 @@ templ FinalBalance(session db.Session, transfers []BalanceTransferItem) {
 			</button>
 		</div>
 	</div>
-	<div class="space-y-4 mb-4">
-		if len(transfers) == 0 {
-			<p class="text-gray-400">Nessun debito da regolare 🎉</p>
-		} else {
-			for _, tr := range transfers {
-				<div
-					if tr.From.ID == GetUser(ctx).ID {
-						x-data="{ expanded: false }"
-						@click="expanded = !expanded"
-						class="bg-gray-800/60 border border-amber-400/50 rounded-xl p-4 shadow-md"
-					} else {
-						class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md"
-					}
-				>
-					<div class="flex items-center justify-between">
-						<div>
-							<span class="text-gray-200 font-medium">{ tr.From.Username.String }</span>
-							<span class="text-gray-400">deve a </span>
-							<span class="text-gray-200 font-medium">{ tr.To.Username.String }</span>
+	if !session.IsClosed {
+		<div class="flex justify-around items-center">
+			<p class="text-gray-400">Chiudi la sessione per avere i conti finali minimizzati</p>
+			if GetUser(ctx).ID == session.CreatedByID {
+				<form hx-post={ "/sessions/" + session.ID.String() + "/close" } hx-swap="outerHTML">
+					<button
+						type="submit"
+						class="px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-200 hover:bg-red-500/30"
+					>
+						Chiudi sessione
+					</button>
+				</form>
+			}
+		</div>
+	} else {
+		<div class="space-y-4 mb-4">
+			if len(transfers) == 0 {
+				<p class="text-gray-400">Nessun debito da regolare 🎉</p>
+			} else {
+				for _, tr := range transfers {
+					<div
+						if tr.DebtorID == GetUser(ctx).ID {
+							x-data="{ expanded: false }"
+							@click="expanded = !expanded"
+							class="bg-gray-800/60 border border-amber-400/50 rounded-xl p-4 shadow-md"
+						} else {
+							class="bg-gray-800/60 border border-gray-700 rounded-xl p-4 shadow-md"
+						}
+					>
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="text-gray-200 font-medium">{ tr.User_2.Username.String }</span>
+								<span class="text-gray-400">deve a </span>
+								<span class="text-gray-200 font-medium">{ tr.User.Username.String }</span>
+							</div>
+							<span class="text-emerald-400 font-bold text-lg tracking-wide">€{ tr.Amount.String() }</span>
 						</div>
-						<span class="text-emerald-400 font-bold text-lg tracking-wide">€{ fmt.Sprintf("%.02f", tr.Amount) }</span>
-					</div>
-					if tr.From.ID == GetUser(ctx).ID {
-						<div x-show="expanded" x-transition>
-							<hr class="h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"/>
-							<div class="flex items-center justify-center space-x-4">
-								if tr.To.Iban != "" {
-									<button
-										x-data={ fmt.Sprintf("{ copied: false, iban: '%s'}", tr.To.Iban) }
-										@click.stop
-										@click="navigator.clipboard.writeText(iban); copied = true; setTimeout(() => copied = false, 2000)"
-										class="flex items-center justify-center gap-2 px-5 py-3
+						if tr.DebtorID == GetUser(ctx).ID {
+							<div x-show="expanded" x-transition>
+								<hr class="h-px mt-2 mb-3 bg-gray-200 border-0 dark:bg-gray-700"/>
+								<div class="flex items-center justify-center space-x-4">
+									if tr.User.Iban != "" {
+										<button
+											x-data={ fmt.Sprintf("{ copied: false, iban: '%s'}", tr.User.Iban) }
+											@click.stop
+											@click="navigator.clipboard.writeText(iban); copied = true; setTimeout(() => copied = false, 2000)"
+											class="flex items-center justify-center gap-2 px-5 py-3
 									rounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50
 									hover:bg-slate-700/70 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20
 									transition-all duration-200 text-white font-medium"
-									>
-										<!-- Icona Copy -->
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke-width="1.5"
-											stroke="currentColor"
-											class="w-5 h-5"
 										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M8 16.5h8m-8-4h8m-8-4h4M3 7.5a2.25 2.25 0 012.25-2.25h9L18 7.5v9A2.25 2.25 0 0115.75 18H5.25A2.25 2.25 0 013 15.75v-8.25zM18 7.5V18a2.25 2.25 0 002.25-2.25V9.75A2.25 2.25 0 0018 7.5z"
-											></path>
-										</svg>
-										<span x-show="!copied">Copy IBAN</span>
-										<span x-show="copied" class="text-green-400">Copied!</span>
-									</button>
-								}
-								if tr.To.PaypalUsername.String != "" {
-									<a
-										href={ fmt.Sprintf("https://paypal.me/%s", tr.To.PaypalUsername.String) }
-										target="_blank"
-									>
-										<button
-											@click.stop
-											class="flex items-center justify-center gap-2 px-5 py-3
+											<!-- Icona Copy -->
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="1.5"
+												stroke="currentColor"
+												class="w-5 h-5"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M8 16.5h8m-8-4h8m-8-4h4M3 7.5a2.25 2.25 0 012.25-2.25h9L18 7.5v9A2.25 2.25 0 0115.75 18H5.25A2.25 2.25 0 013 15.75v-8.25zM18 7.5V18a2.25 2.25 0 002.25-2.25V9.75A2.25 2.25 0 0018 7.5z"
+												></path>
+											</svg>
+											<span x-show="!copied">Copy IBAN</span>
+											<span x-show="copied" class="text-green-400">Copied!</span>
+										</button>
+									}
+									if tr.User.PaypalUsername.String != "" {
+										<a
+											href={ fmt.Sprintf("https://paypal.me/%s", tr.User.PaypalUsername.String) }
+											target="_blank"
+										>
+											<button
+												@click.stop
+												class="flex items-center justify-center gap-2 px-5 py-3
 										rounded-xl bg-slate-800/70 backdrop-blur-md border border-slate-700/50
 										hover:bg-slate-700/70 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20
 										transition-all duration-200 text-white font-medium"
-										>
-											<!-- Icona PayPal -->
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 24 24"
-												fill="currentColor"
-												class="w-5 h-5 text-[#009cde]"
 											>
-												<path d="M7.5 21H5.2c-.6 0-1-.5-.9-1.1l1.9-12.3c.1-.5.5-.9 1-.9h6.5c2.5 0 4.4.5 5.6 1.6 1.2 1 1.7 2.6 1.3 4.8-.6 3.7-2.8 5.6-6.5 5.6h-1.6l-.5 3.2c-.1.6-.6 1.1-1.2 1.1H7.5z"></path>
-											</svg>
-											<span>Pay with PayPal</span>
-										</button>
-									</a>
-								}
-								if tr.To.PaypalUsername.String == "" && tr.To.Iban == "" {
-									<div class="flex items-center space-x-2"><span class="italic font-medium text-gray-400">No info</span></div>
-								}
+												<!-- Icona PayPal -->
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="currentColor"
+													class="w-5 h-5 text-[#009cde]"
+												>
+													<path d="M7.5 21H5.2c-.6 0-1-.5-.9-1.1l1.9-12.3c.1-.5.5-.9 1-.9h6.5c2.5 0 4.4.5 5.6 1.6 1.2 1 1.7 2.6 1.3 4.8-.6 3.7-2.8 5.6-6.5 5.6h-1.6l-.5 3.2c-.1.6-.6 1.1-1.2 1.1H7.5z"></path>
+												</svg>
+												<span>Pay with PayPal</span>
+											</button>
+										</a>
+									}
+									if tr.User.PaypalUsername.String == "" && tr.User.Iban == "" {
+										<div class="flex items-center space-x-2"><span class="italic font-medium text-gray-400">No info</span></div>
+									}
+								</div>
 							</div>
-						</div>
-					}
-				</div>
+						}
+					</div>
+				}
 			}
-		}
-	</div>
-	<div class="flex justify-around items-center">
-		if GetUser(ctx).ID == session.CreatedByID && !session.IsClosed {
-			<form hx-post={ "/sessions/" + session.ID.String() + "/close" } hx-swap="outerHTML">
-				<button
-					type="submit"
-					class="px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-200 hover:bg-red-500/30"
-				>
-					Chiudi sessione
-				</button>
-			</form>
-		}
-	</div>
+		</div>
+	}
 }

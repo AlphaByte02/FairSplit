@@ -24,8 +24,13 @@ sql:
                         pointer: true
                   - db_type: "pg_catalog.numeric"
                     go_type:
-                        import: "github.com/AlphaByte02/FairSplit/internal/types"
-                        type: "Numeric"
+                        import: "github.com/shopspring/decimal"
+                        type: "Decimal"
+                  - db_type: "pg_catalog.numeric"
+                    nullable: true
+                    go_type:
+                        import: "github.com/shopspring/decimal"
+                        type: "NullDecimal"
                   - db_type: "text"
                     nullable: true
                     go_type:

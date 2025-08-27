@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/shopspring/decimal"
 )
 
 func DeleteTransaction(c fiber.Ctx) error {
@@ -115,10 +116,10 @@ func HandleEditTransaction(c fiber.Ctx) error {
 	}
 
 	var transactionParams struct {
-		Payer       uuid.UUID     `json:"payer" form:"payer"`
-		Amount      types.Numeric `json:"amount" form:"amount"`
-		Description types.Text    `json:"description" form:"description"`
-		PaidFor     []string      `json:"paid_for" form:"paid_for"`
+		Payer       uuid.UUID       `json:"payer" form:"payer"`
+		Amount      decimal.Decimal `json:"amount" form:"amount"`
+		Description types.Text      `json:"description" form:"description"`
+		PaidFor     []string        `json:"paid_for" form:"paid_for"`
 	}
 	err = c.Bind().Form(&transactionParams)
 	if err != nil {
@@ -151,10 +152,10 @@ func HandleTransaction(c fiber.Ctx) error {
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
 	var transactionParams struct {
-		Payer       uuid.UUID     `json:"payer" form:"payer"`
-		Amount      types.Numeric `json:"amount" form:"amount"`
-		Description types.Text    `json:"description" form:"description"`
-		PaidFor     []string      `json:"paid_for" form:"paid_for"`
+		Payer       uuid.UUID       `json:"payer" form:"payer"`
+		Amount      decimal.Decimal `json:"amount" form:"amount"`
+		Description types.Text      `json:"description" form:"description"`
+		PaidFor     []string        `json:"paid_for" form:"paid_for"`
 	}
 	err := c.Bind().Form(&transactionParams)
 	if err != nil {

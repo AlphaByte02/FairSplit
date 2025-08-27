@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/AlphaByte02/FairSplit/internal/db"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/shopspring/decimal"
 )
 
 var sessionRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-\s]{3,20}$`)
@@ -143,7 +145,68 @@ func SessionClose(c fiber.Ctx) error {
 	}
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
-	err := Q.CloseSession(c, session.ID)
+
+	balances, err := Q.GetSessionBalances(c, session.ID)
+	if err != nil {
+		return err
+	}
+
+	minValue := decimal.NewFromFloat(0.01)
+
+	type balanceItem struct {
+		User   db.User
+		Amount decimal.Decimal
+	}
+
+	var debtors, creditors []balanceItem
+	for _, b := range balances {
+		if b.Balance.LessThan(minValue) {
+			creditors = append(creditors, balanceItem{
+				User:   b.User,
+				Amount: b.Balance,
+			})
+		} else if b.Balance.GreaterThan(minValue) {
+			debtors = append(debtors, balanceItem{
+				User:   b.User,
+				Amount: b.Balance.Neg(),
+			})
+		}
+	}
+
+	slices.SortFunc(debtors, func(a, b balanceItem) int {
+		return a.Amount.Cmp(b.Amount)
+	})
+	slices.SortFunc(creditors, func(a, b balanceItem) int {
+		return a.Amount.Cmp(b.Amount)
+	})
+
+	var minimizedBalances []db.SaveFinalBalanceParams
+	di, ci := 0, 0
+	for di < len(debtors) && ci < len(creditors) {
+		payAmt := decimal.Min(debtors[di].Amount, creditors[ci].Amount)
+		if payAmt.GreaterThan(minValue) {
+			newID, _ := uuid.NewV7()
+			minimizedBalances = append(minimizedBalances, db.SaveFinalBalanceParams{
+				ID:         newID,
+				SessionID:  session.ID,
+				CreditorID: debtors[di].User.ID,
+				DebtorID:   creditors[ci].User.ID,
+				Amount:     payAmt,
+			})
+		}
+		debtors[di].Amount = debtors[di].Amount.Sub(payAmt)
+		creditors[ci].Amount = creditors[ci].Amount.Sub(payAmt)
+		if debtors[di].Amount.LessThan(minValue) {
+			di++
+		}
+		if creditors[ci].Amount.LessThan(minValue) {
+			ci++
+		}
+	}
+
+	Q.SaveFinalBalance(c, minimizedBalances)
+
+	err = Q.CloseSession(c, session.ID)
 	if err != nil {
 		return SendError(
 			c,
@@ -155,8 +218,12 @@ func SessionClose(c fiber.Ctx) error {
 	}
 	session.IsClosed = true
 
+	transfers, _ := Q.GetFinalBalancesBySession(c, session.ID)
+
 	participants, _ := Q.ListSessionParticipants(c, session.ID)
-	return Render(c, views.SessionHeader(session, participants))
+
+	Render(c, views.SessionHeader(session, participants))
+	return Render(c, views.FinalBalance(session, transfers))
 }
 
 func SessionRename(c fiber.Ctx) error {
