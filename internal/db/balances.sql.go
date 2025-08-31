@@ -259,15 +259,15 @@ func (q *Queries) GetSessionBalances(ctx context.Context, sessionID uuid.UUID) (
 	return items, nil
 }
 
-const setDeptPaid = `-- name: SetDeptPaid :exec
+const toggleDeptPaid = `-- name: ToggleDeptPaid :exec
 UPDATE final_balances
 SET
-    is_paid = TRUE
+    is_paid = NOT is_paid
 WHERE
     id = $1
 `
 
-func (q *Queries) SetDeptPaid(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, setDeptPaid, id)
+func (q *Queries) ToggleDeptPaid(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, toggleDeptPaid, id)
 	return err
 }

@@ -52,6 +52,7 @@ func main() {
 
 	app := fiber.New(fiber.Config{})
 	app.State().Set("queries", queries)
+	app.State().Set("pool", pool)
 
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{

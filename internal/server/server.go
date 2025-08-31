@@ -42,6 +42,7 @@ func (s *Server) RegisterRoutes() {
 
 	s.Get("/sessions/:id/balances/intermediate", RequireAuth, HaveSessionAccess, handlers.BalancesIntermediate)
 	s.Get("/sessions/:id/balances/final", RequireAuth, HaveSessionAccess, handlers.BalancesFinal)
+	s.Post("/sessions/:id/balances/:balance/toggle-paid", RequireAuth, HaveSessionAccess, handlers.BalanceTogglePaid)
 }
 
 func (s *Server) Start(port string) {

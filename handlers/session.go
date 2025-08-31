@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
 )
 
@@ -27,7 +28,13 @@ func HandleSession(c fiber.Ctx) error {
 	newSessionID, _ := uuid.NewV7()
 
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
-	session, err := Q.CreateSession(c, db.CreateSessionParams{ID: newSessionID, CreatedByID: user.ID, Name: name})
+	pool, _ := fiber.GetState[*pgxpool.Pool](c.App().State(), "pool")
+
+	tx, _ := pool.Begin(c)
+	defer tx.Rollback(c)
+	qtx := Q.WithTx(tx)
+
+	session, err := qtx.CreateSession(c, db.CreateSessionParams{ID: newSessionID, CreatedByID: user.ID, Name: name})
 	if err != nil {
 		if err, ok := err.(*pgconn.PgError); ok && err.Code == "23505" {
 			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Questa sessione esiste già")
@@ -36,9 +43,14 @@ func HandleSession(c fiber.Ctx) error {
 		return err
 	}
 
-	err = Q.AddSessionParticipant(c, db.AddSessionParticipantParams{SessionID: session.ID, UserID: user.ID})
+	err = qtx.AddSessionParticipant(c, db.AddSessionParticipantParams{SessionID: session.ID, UserID: user.ID})
 	if err != nil {
 		return err
+	}
+
+	err = tx.Commit(c)
+	if err != nil {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Qualcosa è andato storto")
 	}
 
 	return Render(c, views.SessionItem(session))
@@ -160,12 +172,12 @@ func SessionClose(c fiber.Ctx) error {
 
 	var debtors, creditors []balanceItem
 	for _, b := range balances {
-		if b.Balance.LessThan(minValue) {
+		if b.Balance.GreaterThan(minValue) {
 			creditors = append(creditors, balanceItem{
 				User:   b.User,
 				Amount: b.Balance,
 			})
-		} else if b.Balance.GreaterThan(minValue) {
+		} else if b.Balance.LessThan(minValue.Neg()) {
 			debtors = append(debtors, balanceItem{
 				User:   b.User,
 				Amount: b.Balance.Neg(),
@@ -174,10 +186,10 @@ func SessionClose(c fiber.Ctx) error {
 	}
 
 	slices.SortFunc(debtors, func(a, b balanceItem) int {
-		return a.Amount.Cmp(b.Amount)
+		return b.Amount.Cmp(a.Amount)
 	})
 	slices.SortFunc(creditors, func(a, b balanceItem) int {
-		return a.Amount.Cmp(b.Amount)
+		return b.Amount.Cmp(a.Amount)
 	})
 
 	var minimizedBalances []db.SaveFinalBalanceParams

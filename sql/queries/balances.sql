@@ -107,9 +107,9 @@ WHERE
     session_id = $1;
 
 
--- name: SetDeptPaid :exec
+-- name: ToggleDeptPaid :exec
 UPDATE final_balances
 SET
-    is_paid = TRUE
+    is_paid = NOT is_paid
 WHERE
     id = $1;

@@ -62,7 +62,31 @@ func BalancesIntermediate(c fiber.Ctx) error {
 func BalancesFinal(c fiber.Ctx) error {
 	session := fiber.Locals[db.Session](c, "session")
 
-	var transfers []db.GetFinalBalancesBySessionRow
+	if session.IsClosed {
+		Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
 
-	return Render(c, views.FinalBalance(session, transfers))
+		transfers, err := Q.GetFinalBalancesBySession(c, session.ID)
+		if err != nil {
+			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Cant retrive balances")
+		}
+
+		return Render(c, views.FinalBalance(session, transfers))
+	} else {
+		var transfers []db.GetFinalBalancesBySessionRow
+		return Render(c, views.FinalBalance(session, transfers))
+	}
+
+}
+
+func BalanceTogglePaid(c fiber.Ctx) error {
+	balanceID, _ := fiber.Convert(c.Params("balance"), uuid.Parse)
+
+	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+
+	err := Q.ToggleDeptPaid(c, balanceID)
+	if err != nil {
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

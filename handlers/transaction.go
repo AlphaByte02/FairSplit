@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
 )
 
@@ -99,6 +100,7 @@ func HandleEditTransaction(c fiber.Ctx) error {
 	user := fiber.Locals[db.User](c, "user")
 	session := fiber.Locals[db.Session](c, "session")
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+	pool, _ := fiber.GetState[*pgxpool.Pool](c.App().State(), "pool")
 
 	transactionID, _ := fiber.Convert(c.Params("transaction"), uuid.Parse)
 
@@ -130,7 +132,11 @@ func HandleEditTransaction(c fiber.Ctx) error {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nessun partecipante aggiunto")
 	}
 
-	err = Q.UpdateTransactions(
+	tx, _ := pool.Begin(c)
+	defer tx.Rollback(c)
+	qtx := Q.WithTx(tx)
+
+	err = qtx.UpdateTransactions(
 		c,
 		db.UpdateTransactionsParams{
 			ID:          transaction.ID,
@@ -141,6 +147,13 @@ func HandleEditTransaction(c fiber.Ctx) error {
 		},
 	)
 
+	// TODO: Manage difference on PaidFor
+
+	err = tx.Commit(c)
+	if err != nil {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Qualcosa è andato storto")
+	}
+
 	transactions, _ := Q.ListTransactionsBySession(c, session.ID)
 
 	return Render(c, views.SessionBody(session, transactions))
@@ -150,6 +163,7 @@ func HandleTransaction(c fiber.Ctx) error {
 	user := fiber.Locals[db.User](c, "user")
 	session := fiber.Locals[db.Session](c, "session")
 	Q, _ := fiber.GetState[*db.Queries](c.App().State(), "queries")
+	pool, _ := fiber.GetState[*pgxpool.Pool](c.App().State(), "pool")
 
 	var transactionParams struct {
 		Payer       uuid.UUID       `json:"payer" form:"payer"`
@@ -166,8 +180,12 @@ func HandleTransaction(c fiber.Ctx) error {
 		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Nessun partecipante aggiunto")
 	}
 
+	tx, _ := pool.Begin(c)
+	defer tx.Rollback(c)
+	qtx := Q.WithTx(tx)
+
 	newTransactionID, _ := uuid.NewV7()
-	_, err = Q.CreateTransaction(c, db.CreateTransactionParams{
+	_, err = qtx.CreateTransaction(c, db.CreateTransactionParams{
 		ID:          newTransactionID,
 		SessionID:   session.ID,
 		PayerID:     transactionParams.Payer,
@@ -185,13 +203,18 @@ func HandleTransaction(c fiber.Ctx) error {
 			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'id di un partecipante non è valido")
 		}
 
-		err = Q.AddTransactionParticipant(
+		err = qtx.AddTransactionParticipant(
 			c,
 			db.AddTransactionParticipantParams{TransactionID: newTransactionID, UserID: pUUID},
 		)
 		if err != nil {
 			return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "L'id di un partecipante non è valido")
 		}
+	}
+
+	err = tx.Commit(c)
+	if err != nil {
+		return SendError(c, fiber.StatusBadRequest, "danger", "Errore", "Qualcosa è andato storto")
 	}
 
 	transactions, _ := Q.ListTransactionsBySession(c, session.ID)
