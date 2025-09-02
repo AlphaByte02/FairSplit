@@ -50,7 +50,14 @@ func main() {
 
 	queries := db.New(pool)
 
-	app := fiber.New(fiber.Config{})
+	fiberConfig := fiber.Config{}
+	reverseProxy := os.Getenv("REVERSE_PROXY")
+	if reverseProxy == "true" {
+		log.Println("Reverse proxy enabled")
+		fiberConfig.ProxyHeader = fiber.HeaderXForwardedFor
+	}
+
+	app := fiber.New(fiberConfig)
 	app.State().Set("queries", queries)
 	app.State().Set("pool", pool)
 

@@ -17,6 +17,7 @@ services:
             ENV: production
             DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/fairsplit
             PORT: "8080"
+            REVERSE_PROXY:
 
             CRYPT_KEY:
             GOOGLE_CLIENT_ID:

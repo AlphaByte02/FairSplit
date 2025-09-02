@@ -336,9 +336,7 @@ templ TransactionModalContent(props TransactionModalProps) {
 						for _, u := range props.AllParticipants {
 							<option
 								value={ u.ID.String() }
-								if (!props.IsEdit && u.ID == GetUser(ctx).ID) || (props.IsEdit && u.ID == props.Transaction.PayerID) {
-									selected
-								}
+								selected?={ (!props.IsEdit && u.ID == GetUser(ctx).ID) || (props.IsEdit && u.ID == props.Transaction.PayerID) }
 							>
 								{ u.Username.String }
 							</option>
@@ -417,9 +415,7 @@ templ TransactionModalContent(props TransactionModalProps) {
 								name="paid_for"
 								value={ p.ID.String() }
 								class="accent-emerald-500"
-								if slices.Contains(props.Participants, p) {
-									checked
-								}
+								checked?={ slices.Contains(props.Participants, p) }
 							/>
 							<span>{ p.Username.String }</span>
 						</label>

@@ -332,7 +332,7 @@ func FinalBalance(session db.Session, transfers []db.GetFinalBalancesBySessionRo
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					if tr.User.ID == GetUser(ctx).ID {
+					if tr.CreditorID == GetUser(ctx).ID {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " hx-post=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -361,7 +361,7 @@ func FinalBalance(session db.Session, transfers []db.GetFinalBalancesBySessionRo
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					if tr.User.ID == GetUser(ctx).ID {
+					if tr.CreditorID == GetUser(ctx).ID {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<span class=\"w-5 h-5 border-2 rounded-md flex items-center justify-center transition border-gray-500 group-has-checked:bg-emerald-500 group-has-checked:border-emerald-500\"><svg class=\"w-3 h-3 text-white hidden group-has-checked:block\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5 13l4 4L19 7\"></path></svg></span>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err

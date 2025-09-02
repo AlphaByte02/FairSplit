@@ -10,4 +10,4 @@ TODO:
 -   [x] Edit/Delete transaction
 -   [ ] Internalization
 -   [ ] Homepage
--   [ ] Materialize on a table the final balance when the session is closed
+-   [x] Materialize on a table the final balance when the session is closed
