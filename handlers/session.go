@@ -201,8 +201,8 @@ func SessionClose(c fiber.Ctx) error {
 			minimizedBalances = append(minimizedBalances, db.SaveFinalBalanceParams{
 				ID:         newID,
 				SessionID:  session.ID,
-				CreditorID: debtors[di].User.ID,
-				DebtorID:   creditors[ci].User.ID,
+				CreditorID: creditors[ci].User.ID,
+				DebtorID:   debtors[di].User.ID,
 				Amount:     payAmt,
 			})
 		}
