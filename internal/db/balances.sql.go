@@ -26,6 +26,8 @@ FROM
     LEFT JOIN users debt ON fb.debtor_id = debt.id
 WHERE
     session_id = $1
+ORDER BY
+    fb.id
 `
 
 type GetFinalBalancesBySessionRow struct {

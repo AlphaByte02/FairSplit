@@ -104,7 +104,9 @@ FROM
     LEFT JOIN users cred ON fb.creditor_id = cred.id
     LEFT JOIN users debt ON fb.debtor_id = debt.id
 WHERE
-    session_id = $1;
+    session_id = $1
+ORDER BY
+    fb.id;
 
 
 -- name: ToggleDeptPaid :exec
